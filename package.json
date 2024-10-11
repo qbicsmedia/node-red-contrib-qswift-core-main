@@ -1,6 +1,6 @@
 {
     "name": "@qbicsmedia/node-red-contrib-qswift-core",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "description": "Workflow nodes for Qbics media Swift",
     "keywords": [
         "node-red"
@@ -14,7 +14,8 @@
             "sf-activity-task-callback-wait": "sf-activity-task-callback-wait.js",
             "sf-execution-start": "sf-execution-start.js",
             "http-in-auth-config": "http-in-auth-config.js",
-            "http-in-auth": "http-in-auth.js"
+            "http-in-auth": "http-in-auth.js",
+            "webhookReceiver" : "webhookReceiver.js"
         },
         "plugins": {
             "qstore-panel": "plugins/qstorePanel/qstore-panel.html"
@@ -24,7 +25,9 @@
         "@aws-sdk/client-dynamodb": "^3.338.0",
         "@aws-sdk/client-sfn": "^3.329.0",
         "@aws-sdk/util-arn-parser": "^3.310.0",
-        "@aws-sdk/util-dynamodb": "^3.338.0"
+        "@aws-sdk/util-dynamodb": "^3.338.0",
+        "sqs-consumer" : "^11.1.0"
+
     },
     "publishConfig": {
         "registry": "https://npm.pkg.github.com"
