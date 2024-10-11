@@ -4,9 +4,10 @@ const { Consumer } = require("sqs-consumer");
 module.exports = function(RED) {
 	function LongPollingSQS(config) {
 		RED.nodes.createNode(this, config);
+		this.sqsArn = config.sqsArn;
         const node = this;
         const app = Consumer.create({
-            queueUrl:  config.sqsArn,
+            queueUrl:  node.sqsArn,
             handleMessage: async (message) => {
                 msg.payload = message
                 node.send([msg, null]);
