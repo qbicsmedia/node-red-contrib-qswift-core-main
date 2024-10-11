@@ -1,0 +1,17 @@
+{
+    "name": "Qbics Private Nodes",
+    "updated_at": "2024-08-19T05:43:50.536Z",
+    "modules": [
+        {
+            "id": "node-red-contrib-qswift-core-main",
+            "version": "1.0.0",
+            "description": "Core nodes for Kunnusta workflow engine",
+            "updated_at": "2024-08-19T05:43:50.536Z",
+            "types": [],
+            "keywords": [
+                "node-red"
+            ],
+            "url": "https://github.com/qbicsmedia/node-red-contrib-qswift-core-main.git"
+        }
+    ]
+}
