@@ -14,8 +14,14 @@ module.exports = function(RED) {
         queueUrl: node.sqsArn,
         handleMessage: async (message) => {
           const msg = {}; // Create a new message object
-          msg.payload = message;
-          node.send([msg, null]); // Send the message on the first output
+          try {
+            msg.payload = JSON.parse(message.Body)
+            node.send([msg, null]);
+          } catch (error) {
+            msg.payload = message
+            node.send([null,msg.payload]);
+          } 
+           // Send the message on the first output
         },
       });
 
