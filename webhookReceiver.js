@@ -15,11 +15,11 @@ module.exports = function(RED) {
         handleMessage: async (message) => {
           const msg = {}; // Create a new message object
           try {
-            msg.payload = JSON.parse(message.Body)
+            msg = JSON.parse(message.Body)
             node.send([msg, null]);
           } catch (error) {
             msg.payload = message
-            node.send([null,msg.payload]);
+            node.send([null,msg]);
           } 
            // Send the message on the first output
         },
