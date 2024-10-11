@@ -1,0 +1,198 @@
+<style type="text/css">
+	#red-ui-qstore-panel {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	#red-ui-qstore-panel .qstore-panel-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	#red-ui-qstore-panel .qstore-panel-header .qstore-dropdown {
+		flex: 1;
+		padding-right: 10px;
+	}
+	#red-ui-qstore-panel .qstore-panel-header .qstore-dropdown .red-ui-typedInput-container {
+		width: 100%;
+	}
+
+	#red-ui-qstore-panel .qstore-panel-info {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 8px 10px;
+		border-bottom: 1px solid var(--red-ui-secondary-border-color);
+	}
+	#red-ui-qstore-panel .qstore-panel-info .qstore-payload-updated-at {
+		flex: 1;
+		padding-right: 10px;
+	}
+	#red-ui-qstore-panel .qstore-panel-info .qstore-payload-updated-at {
+		font-size: 11px;
+	}
+
+	#red-ui-qstore-panel .qstore-panel-payload {
+		position: relative;
+		flex: 1;
+		padding: 8px 10px;
+		font-size: 13px;
+		overflow-y: auto;
+	}
+</style>
+<script type="text/javascript">
+	(function() {
+		class QStorePanelUI {
+			constructor() {
+				this.apiRoot = 'qstore-panel/api';
+				this.dropdownType = 'entry';
+				this.latestDropdownEntry = '';
+				this.datetimeFormatter = new Intl.DateTimeFormat(undefined, {
+					year: 'numeric',
+					month: 'numeric',
+					day: 'numeric',
+					hour: 'numeric',
+					minute: 'numeric',
+					second: 'numeric'
+				});
+			}
+
+			createLayout() {
+				this.$container = $(`
+					<div id="red-ui-qstore-panel" class="red-ui-qstore-panel" />
+				`);
+
+				this.$header = $(`
+					<div class="qstore-panel-header red-ui-sidebar-header">
+						<div class="qstore-dropdown"></div>
+						<div class="qstore-dropdown-refresh"></div>
+					</div>
+				`).appendTo(this.$container);
+
+				this.$info = $(`
+					<div class="qstore-panel-info">
+						<div class="qstore-payload-updated-at"></div>
+						<div class="qstore-payload-refresh"></div>
+					</div>
+				`).appendTo(this.$container);
+
+				this.$payload = $(`
+					<div class="qstore-panel-payload"></div>
+				`).appendTo(this.$container);
+			}
+
+			createElements() {
+				const $dropdownContainer = this.$header.find('.qstore-dropdown');
+				this.$dropdown = $('<input type="text" id="node-input-select-store-entries" />').appendTo($dropdownContainer).typedInput({
+					type: this.dropdownType,
+					types: [{
+						value: this.dropdownType,
+						options: this.createDropdownOptions([])
+					}]
+				});
+
+				const $refreshDropdownContainer = this.$header.find('.qstore-dropdown-refresh');
+				this.$refreshDropdown = $(`
+					<button type="button" id="node-input-refresh-store-entries" class="red-ui-button">
+						<i class="fa fa-refresh"></i>
+					</button>
+				`).appendTo($refreshDropdownContainer);
+				RED.popover.tooltip(this.$refreshDropdown, 'Einträge aktualisieren');
+
+				this.$updatedAt = this.$info.find('.qstore-payload-updated-at');
+
+				const $refreshPayloadContainer = this.$info.find('.qstore-payload-refresh');
+				this.$refreshPayload = $(`
+					<button type="button" id="node-input-refresh-payload" class="red-ui-button red-ui-button-small">
+						<i class="fa fa-refresh"></i>
+					</button>
+				`).appendTo($refreshPayloadContainer);
+				RED.popover.tooltip(this.$refreshPayload, 'Payload aktualisieren');
+			}
+			
+			updateDropdown() {
+				this.$dropdown.typedInput('disable');
+
+				$.getJSON(`${this.apiRoot}/names`).done((data) => {
+					this.$dropdown.typedInput('types', [{
+						value: this.dropdownType,
+						options: this.createDropdownOptions(data)
+					}]);
+				}).fail((jqXHR, textStatus, errorThrown) => {
+					console.error(`Updating dropdown (qstore-panel) failed: ${errorThrown}`);
+				}).always(() => {
+					this.$dropdown.typedInput('enable');
+				});
+			}
+
+			updatePayload() {
+				const name = this.$dropdown.typedInput('value');
+				const hasName = name.trim().length > 0;
+
+				this.$info.toggle(hasName);
+				this.$payload.html('');
+
+				if(hasName) {
+					RED.utils.addSpinnerOverlay(this.$payload, false);
+
+					$.getJSON(`${this.apiRoot}/names/${name}`).done((data) => {
+						this.$updatedAt.text(this.datetimeFormatter.format(new Date()));
+						this.$payload.html('');
+
+						RED.utils.createObjectElement(data, {
+							sourceId: true
+						}).appendTo(this.$payload);
+					}).fail((jqXHR, textStatus, errorThrown) => {
+						this.$payload.text('Payload konnte nicht geladen werden.');
+						console.error(`Updating payload (qstore-panel) failed: ${errorThrown}`);
+					});
+				}
+			}
+
+			createDropdownOptions(data) {
+				const options = data.map((item) => ({ label: item, value: item }));
+				return [{ label: '-- Bitte auswählen --', value: '' }, ...options];
+			}
+		}
+
+		const ui = new QStorePanelUI();
+
+		RED.plugins.registerPlugin('qstore-panel-plugin', {
+			onadd: function() {
+				// create content
+				ui.createLayout();
+				ui.createElements();
+
+				// wire behavior
+				ui.$refreshDropdown.on('click', () => ui.updateDropdown());
+				ui.$refreshPayload.on('click', () => ui.updatePayload());
+				ui.$dropdown.on('change', (ev) => {
+					// avoid re-loading same payload through dropdown refresh (which also triggers change event)
+					if(ui.latestDropdownEntry !== ev.target.value) {
+						ui.latestDropdownEntry = ev.target.value;
+						ui.updatePayload();
+					}
+				});
+
+				// init dropdown
+				ui.updateDropdown();
+				ui.$info.hide();
+
+				// add tab + register show action
+				const action = 'core:show-qstore-panel-tab';
+
+				RED.sidebar.addTab({
+					id: 'qstore-panel',
+					name: 'QStore Data',
+					label: 'QStore',
+					iconClass: 'fa fa-table',
+					content: ui.$container,
+					action
+				});
+				RED.actions.add(action, () => RED.sidebar.show('qstore-panel'));
+			}
+		});
+	})();
+</script>

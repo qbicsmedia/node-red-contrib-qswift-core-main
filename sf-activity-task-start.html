@@ -1,0 +1,78 @@
+<script type="text/javascript">
+	RED.nodes.registerType('qswift-sf-activity-task-start', {
+		category: 'QSwift core',
+		color: '#378aa1',
+		paletteLabel: 'task start',
+		defaults: {
+			name: {
+				value: ''
+			},
+			activityArn: {
+				value: ''
+			},
+			output: {
+				value: 'payload'
+			}
+		},
+		inputs: 0,
+		outputs: 1,
+		icon: 'link-out.svg',
+		align: 'left',
+		label: function() {
+			return this.name || 'activity start';
+		},
+		oneditprepare: function() {
+			$('#node-input-output').typedInput({
+				types: ['msg'],
+				value: this.output
+			});
+		}
+   });
+</script>
+
+<script type="text/html" data-template-name="qswift-sf-activity-task-start">
+	<div class="form-row">
+		<label for="node-input-name">
+			<i class="fa fa-tag"></i>
+			Name
+		</label>
+		<input type="text" id="node-input-name" placeholder="" />
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-activityArn">
+			<i class="fa fa-tag"></i>
+			Activity ARN
+		</label>
+		<input type="text" id="node-input-activityArn" placeholder="" />
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-output">
+			<i class="fa fa-list"></i>
+			Ausgabe
+		</label>
+		<input type="text" id="node-input-output" placeholder="" />
+	</div>
+</script>
+
+<script type="text/html" data-help-name="qswift-sf-activity-task-start">
+	<h2>Node for step function activity</h2>
+
+	<p>NOTE: This node has to be completed by a <code>task complete</code> node!</p>
+
+	<section>
+		<dt>Configuration</dt>
+		<dd>
+			<p><code>Activity ARN</code>: ARN of the state machine activity</p>
+			<p><code>Ausgabe</code>: Property name which is added to the message with the output.</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Output</dt>
+		<dd>
+			<p>Given input for the activity under configured output property name.</p>
+		</dd>
+	</section>
+</script>
