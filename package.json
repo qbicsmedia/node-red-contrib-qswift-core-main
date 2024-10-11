@@ -1,37 +1,36 @@
 {
-  "name": "@qbicsmedia/node-red-contrib-qswift-core",  
-  "version": "1.0.6",
-  "description": "Workflow nodes for Qbics media Swift",
-  "keywords": [
-    "node-red"
-  ],
-  "node-red": {
-    "nodes": {
-      "qswift-mimir-transfer-wait": "qswift-mimir-transfer-wait.js",
-      "sf-activity-task-start": "sf-activity-task-start.js",
-      "sf-activity-task-complete": "sf-activity-task-complete.js",
-      "sf-activity-task-heartbeat": "sf-activity-task-heartbeat.js",
-      "sf-activity-task-callback-wait": "sf-activity-task-callback-wait.js",
-      "sf-execution-start": "sf-execution-start.js",
-      "http-in-auth-config": "http-in-auth-config.js",
-      "http-in-auth": "http-in-auth.js"
+    "name": "@qbicsmedia/node-red-contrib-qswift-core",
+    "version": "1.0.7",
+    "description": "Workflow nodes for Qbics media Swift",
+    "keywords": [
+        "node-red"
+    ],
+    "node-red": {
+        "nodes": {
+            "qswift-mimir-transfer-wait": "qswift-mimir-transfer-wait.js",
+            "sf-activity-task-start": "sf-activity-task-start.js",
+            "sf-activity-task-complete": "sf-activity-task-complete.js",
+            "sf-activity-task-heartbeat": "sf-activity-task-heartbeat.js",
+            "sf-activity-task-callback-wait": "sf-activity-task-callback-wait.js",
+            "sf-execution-start": "sf-execution-start.js",
+            "http-in-auth-config": "http-in-auth-config.js",
+            "http-in-auth": "http-in-auth.js"
+        },
+        "plugins": {
+            "qstore-panel": "plugins/qstorePanel/qstore-panel.html"
+        }
     },
-    "plugins": {
-      "qstore-panel": "plugins/qstorePanel/qstore-panel.html"
+    "dependencies": {
+        "@aws-sdk/client-dynamodb": "^3.338.0",
+        "@aws-sdk/client-sfn": "^3.329.0",
+        "@aws-sdk/util-arn-parser": "^3.310.0",
+        "@aws-sdk/util-dynamodb": "^3.338.0"
+    },
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/qbicsmedia/node-red-contrib-qswift-core.git"
     }
-  },
-  "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.338.0",
-    "@aws-sdk/client-sfn": "^3.329.0",
-    "@aws-sdk/util-arn-parser": "^3.310.0",
-    "@aws-sdk/util-dynamodb": "^3.338.0"
-  },
-  "publishConfig": {
-  "registry": "https://npm.pkg.github.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/qbicsmedia/node-red-contrib-qswift-core.git"
-  }
-  
 }
