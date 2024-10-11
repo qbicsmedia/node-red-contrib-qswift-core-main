@@ -1,5 +1,5 @@
 {
-  "name": "@qbicsmedia/node-red-contrib-qswift-core",
+  "name": "@qbics.media/node-red-contrib-qswift-core",  
   "version": "1.0.3",
   "description": "Workflow nodes for Qbics media Swift",
   "keywords": [
@@ -25,5 +25,9 @@
     "@aws-sdk/client-sfn": "^3.329.0",
     "@aws-sdk/util-arn-parser": "^3.310.0",
     "@aws-sdk/util-dynamodb": "^3.338.0"
+  },
+  "publishConfig": {
+  "registry": "https://npm.pkg.github.com"
   }
+  
 }
