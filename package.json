@@ -1,6 +1,6 @@
 {
     "name": "@qbicsmedia/node-red-contrib-qswift-core",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "Workflow nodes for Qbics media Swift",
     "keywords": [
         "node-red"
