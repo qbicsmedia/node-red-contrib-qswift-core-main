@@ -13,10 +13,10 @@ module.exports = function(RED) {
       const app = Consumer.create({
         queueUrl: node.sqsArn,
         handleMessage: async (message) => {
-          const msg = {}; // Create a new message object
+      
           try {
 
-            msg = {...JSON.parse(message.Body)};
+            msg = { ...JSON.parse(message.Body) };
             node.send([msg, null]);
           } catch (error) {
             msg.payload = message
