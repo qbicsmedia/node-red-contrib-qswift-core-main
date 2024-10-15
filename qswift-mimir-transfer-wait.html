@@ -2,7 +2,7 @@
 	RED.nodes.registerType('qswift-mimir-transfer-wait', {
 		category: 'Kunnusta Core',
 		color: '#378aa1',
-		paletteLabel: 'mimir transfer wait',
+		paletteLabel: 'Mimir OnTransfer completed',
 		defaults: {
 			name: {
 				value: ''
@@ -17,7 +17,7 @@
 		icon: 'link-out.svg',
 		align: 'right',
 		label: function() {
-			return this.name || 'mimir transfer wait';
+			return this.name || 'Mimir OnTransfer completed';
 		},
 		outputLabels: function(index) {
 			return ['success', 'error'][index];

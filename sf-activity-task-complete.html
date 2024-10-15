@@ -2,7 +2,7 @@
 	RED.nodes.registerType('qswift-sf-activity-task-complete', {
 		category: 'Kunnusta Core',
 		color: '#378aa1',
-		paletteLabel: 'task complete',
+		paletteLabel: 'Activity completed',
 		defaults: {
 			name: {
 				value: ''
@@ -19,7 +19,7 @@
 		icon: 'link-out.svg',
 		align: 'right',
 		label: function() {
-			return this.name || 'activity complete';
+			return this.name || 'Activity completed';
 		},
 		outputLabels: function(index) {
 			return ['success', 'error'][index];

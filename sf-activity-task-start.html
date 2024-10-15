@@ -2,7 +2,7 @@
 	RED.nodes.registerType('qswift-sf-activity-task-start', {
 		category: 'Kunnusta Core',
 		color: '#378aa1',
-		paletteLabel: 'task start',
+		paletteLabel: 'Start Activity',
 		defaults: {
 			name: {
 				value: ''
@@ -19,7 +19,7 @@
 		icon: 'link-out.svg',
 		align: 'left',
 		label: function() {
-			return this.name || 'activity start';
+			return this.name || 'Start Activity';
 		},
 		oneditprepare: function() {
 			$('#node-input-output').typedInput({

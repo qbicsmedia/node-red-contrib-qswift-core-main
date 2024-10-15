@@ -29,7 +29,8 @@ module.exports = function(RED) {
 			// NOTE: do not forward QSWIFT_ACTIVITY_TASK_TOKEN
 			const { QSWIFT_ACTIVITY_TASK_TOKEN, ...cleanedPayload } = payload;
 			node.debug(`-> task found: ${JSON.stringify(payload)}`);
-			node.send({ [node.output]: cleanedPayload, _taskToken: taskToken });
+			node.send({ ...payload , _taskToken: taskToken });
+		//	node.send({ [node.output]: payload, _taskToken: taskToken });
 		}
 
 		function onNoTask() {

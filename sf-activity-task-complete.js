@@ -11,11 +11,16 @@ module.exports = function(RED) {
 		node.on('input', handleMessage);
 
 		async function handleMessage(msg) {
-			const { _taskToken, error, cause } = msg;
+			const { _taskToken, error, cause, payload } = msg;
 
 			try {
 				if(config.result === 'success') {
-					msg.result = await sendTaskSuccess(_taskToken, msg[node.output]);
+					let nPayload = {}
+					nPayload.payload = msg[node.output]
+
+					msg.result = await sendTaskSuccess(_taskToken, nPayload);
+			
+				//	msg.result = await sendTaskSuccess(_taskToken, msg[node.output]);
 				} else {
 					msg.result = await sendTaskFailure(_taskToken, error, cause);
 				}

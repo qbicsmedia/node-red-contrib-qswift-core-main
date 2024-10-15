@@ -1,8 +1,8 @@
 <script type="text/javascript">
 	RED.nodes.registerType('qswift-sf-execution-start', {
 		category: 'Kunnusta Core',
-		color: '#378aa1',
-		paletteLabel: 'execution start',
+		color: '#236ba1',
+		paletteLabel: 'Parallel Worklfow',
 		defaults: {
 			name: {
 				value: ''
@@ -13,13 +13,13 @@
 		},
 		inputs: 1,
 		outputs: 2,
-		icon: 'link-out.svg',
+		icon: 'fa-align-left.svg',
 		align: 'right',
 		outputLabels: function(index) {
 			return ['success', 'error'][index];
 		},
 		label: function() {
-			return this.name || 'execution start';
+			return this.name || 'Parallel Worklfow';
 		}
    });
 </script>

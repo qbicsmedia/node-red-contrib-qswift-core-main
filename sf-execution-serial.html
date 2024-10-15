@@ -1,30 +1,30 @@
 <script type="text/javascript">
-	RED.nodes.registerType('webhookReceiver', {
+	RED.nodes.registerType('qswift-sf-execution-serial', {
 		category: 'Kunnusta Core',
-		color: '#378aa1',
-		paletteLabel: 'Mimir Receiver',
+		color: '#236ba1',
+		paletteLabel: 'Serial Worklfow',
 		defaults: {
 			name: {
 				value: ''
 			},
-			sqsArn: {
+			workflowName: {
 				value: ''
 			}
 		},
-		inputs: 0,
+		inputs: 1,
 		outputs: 2,
-		icon: 'inject.svg',
+		icon: 'fa-align-justify.svg',
 		align: 'right',
 		outputLabels: function(index) {
 			return ['success', 'error'][index];
 		},
 		label: function() {
-			return this.name || 'Mimir Receiver';
+			return this.name || 'Serial Worklfow';
 		}
    });
 </script>
 
-<script type="text/html" data-template-name="webhookReceiver">
+<script type="text/html" data-template-name="qswift-sf-execution-serial">
 	<div class="form-row">
 		<label for="node-input-name">
 			<i class="fa fa-tag"></i>
@@ -34,15 +34,15 @@
 	</div>
 
 	<div class="form-row">
-		<label for="node-input-sqsArn">
+		<label for="node-input-workflowName">
 			<i class="fa fa-tag"></i>
-			Receiver ARN
+			State machine ARN
 		</label>
-		<input type="text" id="node-input-sqsArn" placeholder="" />
+		<input type="text" id="node-input-workflowName" placeholder="" />
 	</div>
 </script>
 
-<script type="text/html" data-help-name="webhookReceiver">
+<script type="text/html" data-help-name="qswift-sf-execution-serial">
 	<h2>Node for starting a step function execution</h2>
 
 	<section>
