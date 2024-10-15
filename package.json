@@ -1,6 +1,6 @@
 {
     "name": "@qbicsmedia/node-red-contrib-qswift-core",
-    "version": "1.0.16",
+    "version": "1.0.18",
     "description": "Workflow nodes for Qbics media Swift",
     "keywords": [
         "node-red"
@@ -13,6 +13,7 @@
             "sf-activity-task-heartbeat": "sf-activity-task-heartbeat.js",
             "sf-activity-task-callback-wait": "sf-activity-task-callback-wait.js",
             "sf-execution-start": "sf-execution-start.js",
+            "sf-execution-stop": "sf-execution-stop.js",
             "sf-execution-serial": "sf-execution-serial.js",
             "http-in-auth-config": "http-in-auth-config.js",
             "http-in-auth": "http-in-auth.js",
