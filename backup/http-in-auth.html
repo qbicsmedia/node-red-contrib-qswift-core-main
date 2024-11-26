@@ -1,0 +1,54 @@
+<script type="text/javascript">
+	RED.nodes.registerType('http-in-auth', {
+		category: 'Kunnusta Core',
+		color: '#FFF0F0',
+		paletteLabel: 'HTTP in auth',
+		defaults: {
+			config: {
+				type: 'http-in-auth-config',
+				required: true
+			},
+			name: {
+				value: ''
+			}
+		},
+		inputs: 1,
+		outputs: 2,
+		icon: 'font-awesome/fa-key',
+		align: 'left',
+		label: function() {
+			return this.name || this.paletteLabel;
+		},
+		outputLabels: function(index) {
+			return ['success', 'error'][index];
+		}
+   });
+</script>
+
+<script type="text/html" data-template-name="http-in-auth">
+	<div class="form-row">
+		<label for="node-input-config">
+			<i class="fa fa-user"></i>
+			Config
+		</label>
+		<input type="text" id="node-input-config" />
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-name">
+			<i class="fa fa-tag"></i>
+			Name
+		</label>
+		<input type="text" id="node-input-name" placeholder="" />
+	</div>
+</script>
+
+<script type="text/html" data-help-name="http-in-auth">
+	<h2>Authentication Node for HTTP In endpoints.</h2>
+
+	<section>
+		<p>Currently only BASIC AUTH is supported.</p>
+
+		<p>Like <a href="https://github.com/ttrushin/node-red-contrib-basicauth" target="_blank">node-red-contrib-basicauth</a>, but authentication data is stored in a configuration node.</p>
+	</section>
+</script>

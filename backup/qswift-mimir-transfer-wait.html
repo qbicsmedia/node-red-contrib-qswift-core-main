@@ -1,0 +1,84 @@
+<script type="text/javascript">
+	RED.nodes.registerType('qswift-mimir-transfer-wait', {
+		category: 'Kunnusta Core',
+		color: '#A6BBCF',
+		paletteLabel: 'Mimir TrasferReq completed',
+		defaults: {
+			name: {
+				value: ''
+			},
+			output: {
+				value: 'payload',
+				required: true
+			}
+		},
+		inputs: 1,
+		outputs: 2,
+		icon: 'mimir-tr-completed.png',
+		align: 'right',
+		label: function() {
+			return this.name || 'Mimir TrasferReq completed';
+		},
+		outputLabels: function(index) {
+			return ['success', 'error'][index];
+		},
+		oneditprepare: function() {
+			$('#node-input-output').typedInput({
+				types: ['msg'],
+				value: this.output
+			});
+		}
+   });
+</script>
+
+<script type="text/html" data-template-name="qswift-mimir-transfer-wait">
+	<div class="form-row">
+		<label for="node-input-name">
+			<i class="fa fa-tag"></i>
+			Name
+		</label>
+		<input type="text" id="node-input-name" placeholder="" />
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-output">
+			<i class="fa fa-list"></i>
+			Ausgabe
+		</label>
+		<input type="text" id="node-input-output" placeholder="" />
+	</div>
+</script>
+
+<script type="text/html" data-help-name="qswift-mimir-transfer-wait">
+	<h2>Node for waiting for an external mimir transfer callback</h2>
+
+	<p>This node inserts an entry into a configured Dynamodb table so the activity can be completed after the (external) mimir transfer (AWS gateway) webhook is triggered.</p>
+	<p>NOTE: The table name is taken from the <code>MIMIR_TRANSFER_TABLE</code> environment variable.</p>
+
+	<section>
+		<dt>Configuration</dt>
+		<dd>
+			<p><code>Ausgabe</code>: Property name which is added to the message with the output.</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Input</dt>
+		<dd>
+			<p><code>externalId</code> and <code>itemId</code> are <strong>required</strong> as properties of the <code>payload</code> of the input message.</p>
+			<p>Example: <pre><code>msg.payload = {
+  externalId: 'my-external-id'
+  itemId: 'my-item-id',
+};</code></pre>
+			</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Outputs</dt>
+		<dd>
+			<p>First output is the <code>success</code> output which will add the result as <code>result</code> property to the message.</p>
+			<p>Second output is the <code>error</code> output which will add the given error as <code>error</code> property to the message.</p>
+		</dd>
+	</section>
+</script>

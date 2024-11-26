@@ -1,0 +1,118 @@
+<script type="text/javascript">
+	RED.nodes.registerType('qswift-sf-activity-task-start', {
+		category: 'Kunnusta Core',
+		color: '#D8BFD8',
+		paletteLabel: 'Start Activity',
+		defaults: {
+			name: {
+				value: ''
+			},
+			activityArn: {
+				value: ''
+			},
+			activityName: {
+				value: ''
+			},
+			output: {
+				value: 'payload'
+			}
+		},
+		inputs: 0,
+		outputs: 1,
+		icon: 'font-awesome/fa-play-circle',
+		align: 'left',
+		label: function() {
+			return  this.name || this.activityName ||  "Activity Start" ;
+		},
+		oneditprepare: async function () {
+            // When the form is opened, populate the dropdown with SQS queues
+     //    $("#node-input-kqueues").empty(); // Clear previous dropdown items
+
+            // Make AJAX request to backend to get the list of queues
+           await $.getJSON('awsArns/listActivities', function (data) {
+			console.log(data);
+                if (data.activities && data.activities.length > 0) {
+                    data.activities.forEach(function (activity) {
+				
+                        // Populate the dropdown with the queue URLs
+						const activityArn = activity.activityArn;
+						const activityName = activity.name;
+				
+
+                        $("#node-input-kactivities").append($("<option></option>").attr("value", activityArn).text(activityName))
+					}) 
+                } else {
+                    // Handle case where no queues are available
+                    $("#node-input-kactivities").append($("<option></option>").attr("value", "").text("No activities found"));
+                }
+		//		$("#node-input-kqueues").val = this.sqsArn
+			
+			
+            }).fail(function (jqXHR) {
+                // Handle errors (e.g., wrong AWS credentials)
+                alert("Error fetching Activities : " + jqXHR.responseText);
+            });
+		
+			// Now, set the dropdown to the specific value
+		$("#node-input-kactivities").val(this.activityArn);
+
+		$('#node-input-output').typedInput({
+				types: ['msg'],
+				value: this.output
+			});
+		},
+		oneditsave: function () {
+	
+	// When the form is saved,  capture the selected value
+	this.activityArn = $("#node-input-kactivities").val();
+	this.activityName = $("#node-input-kactivities option:selected").text();
+	console.log(`Selected Activity-Arn for ${this.activityName} during save: ${this.activityArn}`);
+
+
+	}
+   });
+</script>
+
+<script type="text/html" data-template-name="qswift-sf-activity-task-start">
+	<div class="form-row">
+		<label for="node-input-name">
+			<i class="fa fa-tag"></i>
+			Name
+		</label>
+		<input type="text" id="node-input-name" placeholder="" />
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-kactivities"><i class="icon-list"></i> Activity</label>
+		<select id="node-input-kactivities"></select>
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-output">
+			<i class="fa fa-list"></i>
+			Ausgabe
+		</label>
+		<input type="text" id="node-input-output" placeholder="" />
+	</div>
+</script>
+
+<script type="text/html" data-help-name="qswift-sf-activity-task-start">
+	<h2>Node for step function activity</h2>
+
+	<p>NOTE: This node has to be completed by a <code>task complete</code> node!</p>
+
+	<section>
+		<dt>Configuration</dt>
+		<dd>
+			<p><code>Activity ARN</code>: ARN of the state machine activity</p>
+			<p><code>Ausgabe</code>: Property name which is added to the message with the output.</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Output</dt>
+		<dd>
+			<p>Given input for the activity under configured output property name.</p>
+		</dd>
+	</section>
+</script>

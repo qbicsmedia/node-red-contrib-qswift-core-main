@@ -1,0 +1,86 @@
+<script type="text/javascript">
+	RED.nodes.registerType('qswift-sf-execution-start', {
+		category: 'Kunnusta Core',
+		color: '#FFCC66',
+		paletteLabel: 'Parallel Worklfow',
+		defaults: {
+			name: {
+				value: ''
+			},
+			stateMachineArn: {
+				value: ''
+			}
+		},
+		inputs: 1,
+		outputs: 2,
+		icon: 'font-awesome/fa-tasks',
+		align: 'right',
+		outputLabels: function(index) {
+			return ['success', 'error'][index];
+		},
+		label: function() {
+			return this.name || 'Parallel Worklfow';
+		}
+   });
+</script>
+
+<script type="text/html" data-template-name="qswift-sf-execution-start">
+	<div class="form-row">
+		<label for="node-input-name">
+			<i class="fa fa-tag"></i>
+			Name
+		</label>
+		<input type="text" id="node-input-name" placeholder="" />
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-stateMachineArn">
+			<i class="fa fa-tag"></i>
+			State machine ARN
+		</label>
+		<input type="text" id="node-input-stateMachineArn" placeholder="" />
+	</div>
+</script>
+
+<script type="text/html" data-help-name="qswift-sf-execution-start">
+	<h2>Node for starting a step function execution</h2>
+
+	<section>
+		<dt>Configuration</dt>
+		<dd>
+			<p><code>State machine ARN</code>: ARN of the state machine</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Payload</dt>
+		<dd>
+			<p>which will be input of the state machine</p>
+			<p>Example: <pre><code>msg.payload = {
+  item: {
+    title: 'Item A',
+    description: 'This is just an example'
+  }
+};</code></pre>
+			</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Name (optional)</dt>
+		<dd>
+			<p>of the execution (which must be unique)</p>
+			<p>
+				Example: <pre><code>msg.name = `my-execution-${Date.now()}`;</code></pre>
+			</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Outputs</dt>
+		<dd>
+			<p>First output is the <code>success</code> output which will add the result as <code>result</code> property to the message.</p>
+			<p>Second output is the <code>error</code> output which will return the given error.</p>
+		</dd>
+	</section>
+</script>

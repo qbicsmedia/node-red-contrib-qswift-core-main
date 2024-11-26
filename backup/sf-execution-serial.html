@@ -1,0 +1,95 @@
+<script type="text/javascript">
+	RED.nodes.registerType('qswift-sf-execution-serial', {
+		category: 'Kunnusta Core',
+		color: '#FFCC66',
+		paletteLabel: 'Serial Worklfow',
+		defaults: {
+			name: {
+				value: ''
+			},
+			workflowName: {
+				value: ''
+			}
+		},
+		inputs: 1,
+		outputs: 2,
+		icon: 'serial.svg',
+		align: 'right',
+		outputLabels: function(index) {
+			return ['success', 'error'][index];
+		},
+		label: function() {
+			return this.name || 'Serial Worklfow';
+		},
+		oneditprepare: async function () {
+            // When the form is opened, populate the dropdown with SQS queues
+     //    $("#node-input-kqueues").empty(); // Clear previous dropdown items
+
+            // Make AJAX request to backend to get the list of queues
+           await $.getJSON('awsArns/listStateMachines', function (data) {
+			console.log(data);
+		   })
+		}
+   });
+</script>
+
+<script type="text/html" data-template-name="qswift-sf-execution-serial">
+	<div class="form-row">
+		<label for="node-input-name">
+			<i class="fa fa-tag"></i>
+			Name
+		</label>
+		<input type="text" id="node-input-name" placeholder="" />
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-workflowName">
+			<i class="fa fa-tag"></i>
+			State machine ARN
+		</label>
+		<input type="text" id="node-input-workflowName" placeholder="" />
+	</div>
+</script>
+
+<script type="text/html" data-help-name="qswift-sf-execution-serial">
+	<h2>Node for starting a step function execution</h2>
+
+	<section>
+		<dt>Configuration</dt>
+		<dd>
+			<p><code>State machine ARN</code>: ARN of the state machine</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Payload</dt>
+		<dd>
+			<p>which will be input of the state machine</p>
+			<p>Example: <pre><code>msg.payload = {
+  item: {
+    title: 'Item A',
+    description: ' is just an example'
+  }
+};</code></pre>
+			</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Name (optional)</dt>
+		<dd>
+			<p>of the execution (which must be unique)</p>
+			<p>
+				Example: <pre><code>msg.name = `my-execution-${Date.now()}`;</code></pre>
+			</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Outputs</dt>
+		<dd>
+			<p>First output is the <code>success</code> output which will add the result as <code>result</code> property to the message.</p>
+			<p>Second output is the <code>error</code> output which will return the given error.</p>
+		</dd>
+	</section>
+</script>

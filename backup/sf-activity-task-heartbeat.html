@@ -1,0 +1,51 @@
+<script type="text/javascript">
+	RED.nodes.registerType('qswift-sf-activity-task-heartbeat', {
+		category: 'Kunnusta Core',
+		color: '#D8BFD8',
+		paletteLabel: 'Heartbeat Activity',
+		defaults: {
+			name: {
+				value: ''
+			}
+		},
+		inputs: 1,
+		outputs: 2,
+		icon: 'font-awesome/fa-heartbeat',
+		align: 'right',
+		outputLabels: function(index) {
+			return ['success', 'error'][index];
+		},
+		label: function() {
+			return this.name || 'Heartbeat Activity';
+		}
+   });
+</script>
+
+<script type="text/html" data-template-name="qswift-sf-activity-task-heartbeat">
+	<div class="form-row">
+		<label for="node-input-name">
+			<i class="fa fa-tag"></i>
+			Name
+		</label>
+		<input type="text" id="node-input-name" placeholder="" />
+	</div>
+</script>
+
+<script type="text/html" data-help-name="qswift-sf-activity-task-heartbeat">
+	<h2>Node for sending a heartbeat to the given activity</h2>
+
+	<section>
+		<dt>Configuration</dt>
+		<dd>
+			<p>In order to send a heartbeat to the activity the <code>_taskToken</code> of the <code>msg</code> object is used/needed.</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Outputs</dt>
+		<dd>
+			<p>First output is the <code>success</code> output which will add the result as <code>heartbeat</code> property to the message.</p>
+			<p>Second output is the <code>error</code> output which will return the given error.</p>
+		</dd>
+	</section>
+</script>

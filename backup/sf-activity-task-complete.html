@@ -1,0 +1,102 @@
+<script type="text/javascript">
+	RED.nodes.registerType('qswift-sf-activity-task-complete', {
+		category: 'Kunnusta Core',
+		color: '#D8BFD8',
+		paletteLabel: 'Activity completed',
+		defaults: {
+			name: {
+				value: ''
+			},
+			result: {
+				value: ''
+			},
+			output: {
+				value: 'payload'
+			}
+		},
+		inputs: 1,
+		outputs: 0,
+		icon: function() {
+		//	const selectedResult = $('#node-input-result').val();
+			return (this.result === "success") ? 'font-awesome/fa-check-square' : 'font-awesome/fa-window-close';
+		},
+
+		align: 'right',
+		label:function() {
+		//	const selectedResult = $('#node-input-result').val();
+
+		return this.name || (this.result === "success" ? 'Activity completed' : 'Activity failed');
+		},
+		outputLabels: function(index) {
+			return ['success', 'error'][index];
+		},
+		oneditprepare: function() {
+			$('#node-input-result').typedInput({
+				type: 'result',
+				types: [
+					{
+						value: 'result',
+						options: [
+							{ value: 'fail', label: 'Activity Failure' },
+							{ value: 'success', label: 'Activity Success' }
+						]
+					}
+				]
+			});
+
+			$('#node-input-output').typedInput({
+				types: ['msg'],
+				value: this.output
+			});
+		}
+   });
+</script>
+
+<script type="text/html" data-template-name="qswift-sf-activity-task-complete">
+	<div class="form-row">
+		<label for="node-input-name">
+			<i class="fa fa-tag"></i>
+			Name
+		</label>
+		<input type="text" id="node-input-name" placeholder="" />
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-result">
+			<i class="fa fa-tag"></i>
+			Result
+		</label>
+		<input type="text" id="node-input-result" placeholder="" />
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-output">
+			<i class="fa fa-list"></i>
+			Ausgabe
+		</label>
+		<input type="text" id="node-input-output" placeholder="" />
+	</div>
+</script>
+
+<script type="text/html" data-help-name="qswift-sf-activity-task-complete">
+	<h2>Node for completing the given activity</h2>
+
+	<section>
+		<dt>Configuration</dt>
+		<dd>
+			<p><code>Result</code>: Either succeed or fail the activity</p>
+			<p><code>Ausgabe</code>: Property name which is added to the message with the output.</p>
+		</dd>
+		<dd>
+			<p>In order to send a heartbeat to the activity the <code>_taskToken</code> of the <code>msg</code> object is used/needed.</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Outputs</dt>
+		<dd>
+			<p>First output is the <code>success</code> output which will add the result as <code>result</code> property to the message.</p>
+			<p>Second output is the <code>error</code> output which will add the given error as <code>error</code> property to the message.</p>
+		</dd>
+	</section>
+</script>

@@ -1,0 +1,113 @@
+<script type="text/javascript">
+	RED.nodes.registerType('qswift-sf-execution-stop', {
+		category: 'Kunnusta Core',
+		color: '#FFCC66',
+		paletteLabel: 'Stop Worklfow',
+		defaults: {
+			name: {
+				value: ''
+			},
+			cause: {
+				value: ''
+			},
+			stateMachine : {
+						value: ''
+			}
+		},
+		inputs: 1,
+		outputs: 0,
+		icon: 'font-awesome/fa-stop-circle',
+		align: 'right',
+		outputLabels: function(index) {
+			return ['success', 'error'][index];
+		},
+		label:function() {
+		//	const selectedResult = $('#node-input-result').val();
+
+		return this.name || (this.stateMachine === "all" ? 'Stop all Workflows' : 'Stop Workflow');
+		},
+		oneditprepare: function() {
+			$('#node-input-stateMachine').typedInput({
+				type: 'result',
+				types: [
+					{
+						value: 'stateMachine',
+						options: [
+							{ value: 'all', label: 'All Workflows' },
+							{ value: 'current', label: 'Current Workflow' }
+						]
+					}
+				]
+			});
+		}
+   });
+</script>
+
+<script type="text/html" data-template-name="qswift-sf-execution-stop">
+	<div class="form-row">
+		<label for="node-input-name">
+			<i class="fa fa-tag"></i>
+			Name
+		</label>
+		<input type="text" id="node-input-name" placeholder="" />
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-cause">
+			<i class="fa fa-tag"></i>
+			Reason Text
+		</label>
+		<input type="text" id="node-input-cause" placeholder="" />
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-stateMachine">
+			<i class="fa fa-tag"></i>
+			Workflow to stop
+		</label>
+		<input type="text" id="node-input-stateMachine" placeholder="" />
+	</div>
+</script>
+
+<script type="text/html" data-help-name="qswift-sf-execution-stop">
+	<h2>Node for starting a step function execution</h2>
+
+	<section>
+		<dt>Configuration</dt>
+		<dd>
+			<p><code>State machine ARN</code>: ARN of the state machine</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Payload</dt>
+		<dd>
+			<p>which will be input of the state machine</p>
+			<p>Example: <pre><code>msg.payload = {
+  item: {
+    title: 'Item A',
+    description: 'This is just an example'
+  }
+};</code></pre>
+			</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Name (optional)</dt>
+		<dd>
+			<p>of the execution (which must be unique)</p>
+			<p>
+				Example: <pre><code>msg.name = `my-execution-${Date.now()}`;</code></pre>
+			</p>
+		</dd>
+	</section>
+
+	<section>
+		<dt>Outputs</dt>
+		<dd>
+			<p>First output is the <code>success</code> output which will add the result as <code>result</code> property to the message.</p>
+			<p>Second output is the <code>error</code> output which will return the given error.</p>
+		</dd>
+	</section>
+</script>
