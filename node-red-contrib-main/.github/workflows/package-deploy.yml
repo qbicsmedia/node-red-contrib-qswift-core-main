@@ -1,0 +1,67 @@
+name: Publish package to GitHub Packages
+
+on:
+  push:
+    branches:
+      - main
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  AWS_ROLE: ${{ vars.PACKAGE_PUBLISH_ROLE_ARN }}
+
+jobs:
+  setup-node:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+    steps:
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+  uploadPackage:
+    needs: setup-node
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set npm registry
+        run: |
+          npm config set @kunnusta:registry=https://npm.pkg.github.com
+          npm config set //npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure GIT
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Uploading packages
+        run: |
+          npm i
+          npm run build
+          npm run increase-version
+          npm run upload
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  uploadCatalogue:
+    needs: uploadPackage
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE }}
+
+      - name: Uploading catalogue to s3
+        run: |
+          npm run buildCatalogue
+          aws s3 cp catalogue.json s3://node-red-contrib/

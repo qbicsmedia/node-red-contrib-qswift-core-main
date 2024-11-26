@@ -1,0 +1,37 @@
+{
+  "name": "@kunnusta/node-red-contrib-qmanager",
+  "version": "1.0.33",
+  "description": "Utility nodes for kunnusta workflow engine",
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kunnusta/node-red-contrib.git"
+  },
+  "scripts": {
+    "build": "npm run build:check && npm run build:clear && npm run build:dist",
+    "build:check": "tsc -noEmit",
+    "build:dist": "node ../../scripts/build.js",
+    "build:clear": "rimraf ./dist",
+    "lint": "eslint . --ext .ts --fix",
+    "lint:ci": "eslint . --ext .ts",
+    "prettier": "prettier . --write",
+    "prettier:check": "prettier . --check",
+    "test": "jest",
+    "coverage": "jest --coverage",
+    "upload": "npm publish",
+    "install-package": "npm run build && chmod +x ../../install.sh && sh ../../install.sh"
+  },
+  "keywords": [
+    "node-red"
+  ],
+  "node-red": {
+    "nodes": {
+      "text-splitter": "dist/nodes/text-splitter.js"
+    }
+  },
+  "dependencies": {
+    "node-red": "^3.1.9"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "@kunnusta/node-red-contrib-mimir",
+  "version": "1.0.33",
+  "description": "Mimir nodes for kunnusta workflow engine",
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kunnusta/node-red-contrib.git"
+  },
+  "scripts": {
+    "build": "npm run build:check && npm run build:clear && npm run build:dist",
+    "build:check": "tsc -noEmit",
+    "build:dist": "node ../../scripts/build.js",
+    "build:clear": "rimraf ./dist",
+    "lint": "eslint . --ext .ts --fix",
+    "lint:ci": "eslint . --ext .ts",
+    "prettier": "prettier . --write",
+    "prettier:check": "prettier . --check",
+    "test": "jest",
+    "coverage": "jest --coverage",
+    "upload": "npm publish",
+    "install-package": "npm run build && chmod +x ../../install.sh && sh ../../install.sh"
+  },
+  "keywords": [
+    "node-red"
+  ],
+  "node-red": {
+    "nodes": {
+      "mimir-download": "dist/nodes/mimir-download.js",
+      "mimir-host": "dist/nodes/mimir-host.js",
+      "mimir-httpRequest": "dist/nodes/mimir-httpRequest.js",
+      "mimir-item-attachment": "dist/nodes/mimir-item-attachment.js",
+      "mimir-mdf": "dist/nodes/mimir-mdf.js",
+      "mimir-retrieve-items": "dist/nodes/mimir-retrieve-items.js",
+      "mimir-transferRequests": "dist/nodes/mimir-transferrequests.js"
+    }
+  },
+  "dependencies": {
+    "axios": "^1.7.2"
+  }
+}

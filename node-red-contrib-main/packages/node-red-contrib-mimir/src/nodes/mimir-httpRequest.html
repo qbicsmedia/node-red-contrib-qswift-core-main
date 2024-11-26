@@ -1,0 +1,358 @@
+<script type="text/javascript">
+  RED.nodes.registerType('mimir-httpRequest', {
+    category: 'Mimir',
+    color: '#68b0c0',
+    defaults: {
+      host: {
+        type: 'mimir-host',
+        required: true,
+      },
+      name: {
+        value: '',
+      },
+      api: {
+        value: 'message',
+      },
+      method: {
+        value: 'GET',
+      },
+      path: {
+        value: '',
+      },
+      variables: {
+        value: [],
+      },
+      complete: {
+        value: 'payload',
+      },
+      tenantPath: {
+        value: 'req.query.tenant',
+      },
+      tenantPathType: {
+        value: 'msg',
+      },
+      verboseLogging: {
+        value: false,
+      },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: 'mimir-logo.png',
+    align: 'left',
+    label: function () {
+      return this.name || 'Item ' + this.operation;
+    },
+    paletteLabel: 'Mimir HTTP Request',
+    outputLabels: function (index) {
+      return ['success', 'error'][index];
+    },
+    oneditprepare: function () {
+      const availableVariableMappingTypes = ['msg', 'flow', 'global', 'str', 'num', 'bool', 'date', 'env'];
+
+      // API
+      $('#node-input-api').typedInput({
+        types: [
+          {
+            value: 'api',
+            options: [
+              {
+                value: 'message',
+                label: 'Message (msg.method + msg.path)',
+              },
+              {
+                value: 'node',
+                label: 'Node (configure below)',
+              },
+            ],
+          },
+        ],
+      });
+      $('#node-input-api').on('change', (ev, type, value) => {
+        if (value === 'node') {
+          $('#form-group-method-path').show();
+        } else {
+          $('#form-group-method-path').hide();
+        }
+      });
+
+      // METHOD
+      $('#node-input-method').typedInput({
+        types: [
+          {
+            value: 'method',
+            options: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD'].map(method => {
+              return { value: method, label: method };
+            }),
+          },
+        ],
+      });
+
+      // PATH VARIABLES
+      $('#node-input-variables-container').editableList({
+        addItem(row, index, data) {
+          // build structure
+          const $container = $('<div />', { class: 'mimir-httpRequest-variable-container' });
+
+          $('<input />', {
+            class: 'variable-name',
+            type: 'text',
+            value: data.name || '',
+            placeholder: 'Name',
+          }).appendTo($container);
+          $('<input />', { class: 'variable-mapping-type', type: 'hidden' }).appendTo($container);
+
+          const $mappingNode = $('<input />', { class: 'variable-mapping', type: 'text' })
+            .appendTo($container)
+            .typedInput({
+              types: availableVariableMappingTypes,
+              typeField: '.variable-mapping-type',
+            });
+
+          // set data for typed input (has to be afterwards apparently)
+          const { mappingProperty, mappingType } = data;
+          $mappingNode.typedInput('value', mappingProperty);
+          $mappingNode.typedInput('type', mappingType);
+
+          // append structure to row
+          $container.appendTo(row);
+        },
+        removable: true,
+        sortable: false,
+      });
+      $('#node-input-variables-container').editableList('addItems', this.variables || []);
+
+      // OUTPUT (called 'complete' for backwards compatibility)
+      $('#node-input-complete').typedInput({ types: ['msg'] });
+      $('#node-input-complete').typedInput('value', this.complete);
+
+      // TENANT PATH
+      $('#node-input-tenant-path').typedInput({ types: ['msg', 'flow', 'global'] });
+      $('#node-input-tenant-path').typedInput('type', this.tenantPathType ?? 'msg');
+      $('#node-input-tenant-path').typedInput('value', this.tenantPath);
+
+      // VERBOSE LOGGING
+      $('#node-input-verboseLogging').prop('checked', !!this.verboseLogging);
+    },
+    oneditsave: function () {
+      this.variables = $('#node-input-variables-container')
+        .editableList('items')
+        .toArray()
+        .map($node => {
+          return {
+            name: $node.find('.variable-name').val(),
+            mappingType: $node.find('.variable-mapping').typedInput('type'),
+            mappingProperty: $node.find('.variable-mapping').typedInput('value'),
+          };
+        });
+
+      this.tenantPath = $('#node-input-tenant-path').typedInput('value');
+      this.tenantPathType = $('#node-input-tenant-path').typedInput('type');
+
+      this.verboseLogging = $('#node-input-verboseLogging').is(':checked');
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="mimir-httpRequest">
+  <style>
+    #node-input-variables-container .mimir-httpRequest-variable-container {
+      display: grid;
+      grid-template-columns: 49% 49%;
+      grid-gap: 2%;
+    }
+    #node-input-variables-container .mimir-httpRequest-variable-container .variable-name,
+    #node-input-variables-container .mimir-httpRequest-variable-container .variable-mapping {
+      width: 100%;
+    }
+    .mimir-httpRequest-variables-form-row h3 {
+      margin-bottom: 5px;
+    }
+    #node-input-verboseLogging {
+      width: unset;
+    }
+  </style>
+
+  <div class="form-row">
+    <label for="node-input-host">
+      <i class="fa fa-user"></i>
+      Mimir Auth
+    </label>
+    <input type="text" id="node-input-host" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+    <input type="text" id="node-input-name" placeholder="" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-api">
+      <i class="fa fa-tasks"></i>
+      API from
+    </label>
+
+    <input type="text" id="node-input-api" />
+  </div>
+
+  <div class="form-group" id="form-group-method-path">
+    <div class="form-row">
+      <label for="node-input-method">
+        <i class="fa fa-tasks"></i>
+        Method
+      </label>
+
+      <input type="text" id="node-input-method" />
+    </div>
+
+    <div class="form-row">
+      <label for="node-input-path">
+        <i class="fa fa-globe"></i>
+        Path
+      </label>
+      <input type="text" id="node-input-path" placeholder="" />
+    </div>
+
+    <div class="form-row mimir-httpRequest-variables-form-row">
+      <h3>Path variables</h3>
+      <ol id="node-input-variables-container"></ol>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-complete">
+      <i class="fa fa-list"></i>
+      Output
+    </label>
+
+    <input id="node-input-complete" type="text" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant-path">
+      <i class="fa fa-list"></i>
+      Tenant path
+    </label>
+
+    <input id="node-input-tenant-path" type="text" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-verboseLogging">
+      <i class="fa fa-cog"></i>
+      Verbose logging
+    </label>
+
+    <input id="node-input-verboseLogging" type="checkbox" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="mimir-httpRequest">
+  <h2>HTTP Request Node to Mimir API (<a href="https://mimir.mjoll.no/doc/api.html" target="_blank">docs</a>)</h2>
+
+  <section>
+    <p>This node can be used for general purpose HTTP request to the Mimir API.</p>
+
+    <p>
+      API can be configured either through
+      <ul>
+        <li>Message: <code>method</code> and <code>path</code> has to be set on input message (<code>msg</code>)</li>
+        <li>Node: <code>method</code> and <code>path</code> (including path variables) can be set in the node itself</li>
+      </ul>
+    </p>
+  </section>
+
+  <section>
+    <dt>Method</dt>
+    <dd>
+      <p>Method (HTTP verb) can be set through dropdown of the node.</p>
+      <p>Equivalent to setting it through message: <pre><code>msg.method = 'GET';</code></pre></p>
+      <p><strong>NOTE:</strong> HTTP Request Body (PUT/POST only) has to defined as <code>msg.payload</code> on the input message itself.</p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Path</dt>
+    <dd>
+      <p>Path can be set with placeholders through this input of the node.</p>
+      <p>Equivalent to setting it through message: <pre><code>msg.path = '/api/v1/items/798f7206-aa83-4b61-8519-50a8e14148e0&readableMetadataFields=true';</code></pre></p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Path variables</dt>
+    <dd>
+      <p>Placeholders (variables in single curly brackets) have to be defined in the <strong>Path variables</strong> section.</p>
+      <p>
+        First input field is the name of the variable which is used in the path input field.<br />
+        Second input configures where the value is evaluated from.
+      </p>
+
+      <p>Example: <pre><code>  msg.itemId = '798f7206-aa83-4b61-8519-50a8e14148e0'; // from input message
+  msg.readable = true; // from input message
+
+  Path: /api/v1/items/{itemId}&readableMetadataFields={readableMetadata}
+  Path variables:
+    itemId -> msg.itemId
+    readableMetadata -> msg.readable
+
+  Result: /api/v1/items/798f7206-aa83-4b61-8519-50a8e14148e0&readableMetadataFields=true</code></pre>
+      </p>
+
+      <p>There can be an arbitrary number of variables specified and <strong>all occurrences</strong> of a variable will be replaced with its evaluated value.</p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Headers</dt>
+    <dd>
+      <p>Additional headers can be set through the input message.</p>
+      <p>NOTE: This is currently not supported through the configuration of the node itself.</p>
+      <p>Example: <pre><code>  msg.headers = {
+    'x-custom-header': 'myCustomValue'
+  };</code></pre></p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Output</dt>
+    <dd>
+      <p>Output will be at the <code>payload</code> property of the message by default if not defined here otherwise.</p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Tenant path (used only on authType "Tenants")</dt>
+    <dd>
+      <p>
+        Path from <code>msg</code>, <code>flow</code> or <code>global</code> to get the tenant name from.
+      </p>
+
+      <p>
+        Rejects with error <code>Invalid tenant!</code> if tenant name is not a string or is an empty string.<br />
+        Rejects with error <code>Tenant "&lt;TENANT_NAME&gt;" not found!</code> if tenant name cannot be found in config list.
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Verbose logging</dt>
+    <dd>
+      <p>
+        Provides more logging information.
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Node outputs</dt>
+    <dd>
+      <p>
+        On success the message will be sent through the first output.<br />
+        On error the message will be sent through the second output with the <a href="https://github.com/axios/axios#handling-errors" target="_blank">http error</a> as <code>error</code> attached.
+      </p>
+    </dd>
+  </section>
+</script>

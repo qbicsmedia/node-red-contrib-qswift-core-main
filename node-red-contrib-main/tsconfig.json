@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/node-red-contrib-aws" },
+    { "path": "packages/node-red-contrib-mimir" },
+    { "path": "packages/node-red-contrib-utility" },
+    { "path": "packages/node-red-contrib-dina" }
+  ]
+}

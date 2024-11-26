@@ -1,0 +1,69 @@
+name: Build, test and analyze
+
+on:
+  workflow_call:
+    inputs:
+      disable-code-analysis:
+        description: 'Disable code analysis'
+        required: false
+        type: boolean
+    secrets:
+      SONAR_TOKEN:
+        required: true
+      ACTION_MONITORING_SLACK:
+        required: true
+
+env:
+  DISABLE_CODE_ANALYSIS: ${{ github.event.inputs.disable-code-analysis || inputs.disable-code-analysis || 'false' }}
+  NODE_OPTIONS: '--max_old_space_size=4096'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        node-version: ['20.x']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+      - name: Install dependencies
+        run: npm i
+      - name: Lint
+        run: npm run lint:ci
+        continue-on-error: true
+      - name: Build
+        run: npm run build
+      - name: Unit Test
+        run: npm run coverage
+      # - name: Test report
+      #   continue-on-error: true
+      #   uses: dorny/test-reporter@v1
+      #   if: always()
+      #   with:
+      #     name: 'Unit tests'
+      #     path: coverage/junit.xml
+      #     reporter: jest-junit
+      #     fail-on-error: 'false'
+      - name: SonarCloud Scan
+        if: ${{ env.DISABLE_CODE_ANALYSIS == 'false' }}
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: .
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - uses: ahShimul/slack-webhook@master
+        if: always()
+        with:
+          status: ${{ job.status }}
+          notify_when: 'failure' # default: 'success,failure,warnings'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.ACTION_MONITORING_SLACK }} # required

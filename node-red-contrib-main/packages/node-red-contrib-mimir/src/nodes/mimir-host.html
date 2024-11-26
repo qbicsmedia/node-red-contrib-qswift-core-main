@@ -1,0 +1,185 @@
+<script type="text/javascript">
+  RED.nodes.registerType('mimir-host', {
+    category: 'config',
+    defaults: {
+      name: {
+        value: 'Mimir Main',
+      },
+      baseUrl: {
+        value: 'https://mimir.mjoll.no',
+        required: true,
+      },
+      customBaseUrls: {
+        value: [],
+      },
+    },
+    credentials: {
+      tenants: {
+        type: 'text',
+        required: true,
+      },
+    },
+    label: function () {
+      return this.name;
+    },
+    oneditprepare: function () {
+      // TENANTS
+      $('#node-input-tenants-container').editableList({
+        addItem(row, index, data) {
+          const $container = $('<div />', { class: 'mimir-host-tenants-container' });
+
+          $('<input />', {
+            class: 'tenant-name',
+            type: 'text',
+            value: data.name || '',
+            placeholder: 'Tenant name',
+          }).appendTo($container);
+          $('<input />', {
+            class: 'tenant-api-key',
+            type: 'text',
+            value: data.apiKey || '',
+            placeholder: 'API Key',
+          }).appendTo($container);
+
+          $container.appendTo(row);
+        },
+        removable: true,
+        sortable: false,
+      });
+      $('#node-input-tenants-container').editableList('addItems', this.credentials.tenants || []);
+
+      // TENANT CUSTOM BASE URLS
+      $('#node-input-custom-base-urls-container').editableList({
+        addItem(row, index, data) {
+          const $container = $('<div />', { class: 'mimir-host-custom-base-urls-container' });
+
+          $('<input />', {
+            class: 'tenant-name',
+            type: 'text',
+            value: data.tenantName || '',
+            placeholder: 'Tenant name',
+          }).appendTo($container);
+          $('<input />', {
+            class: 'tenant-base-url',
+            type: 'text',
+            value: data.baseUrl || '',
+            placeholder: 'Base Url',
+          }).appendTo($container);
+
+          $container.appendTo(row);
+        },
+        removable: true,
+        sortable: false,
+      });
+      $('#node-input-custom-base-urls-container').editableList('addItems', this.customBaseUrls || []);
+    },
+    oneditsave: function () {
+      this.credentials.tenants = $('#node-input-tenants-container')
+        .editableList('items')
+        .toArray()
+        .map($node => {
+          return {
+            name: $node.find('.tenant-name').val(),
+            apiKey: $node.find('.tenant-api-key').val(),
+          };
+        });
+
+      this.customBaseUrls = $('#node-input-custom-base-urls-container')
+        .editableList('items')
+        .toArray()
+        .map($node => {
+          return {
+            tenantName: $node.find('.tenant-name').val(),
+            baseUrl: $node.find('.tenant-base-url').val(),
+          };
+        });
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="mimir-host">
+  <style>
+    #node-input-tenants-container .mimir-host-tenants-container,
+    #node-input-custom-base-urls-container .mimir-host-custom-base-urls-container {
+      display: grid;
+      grid-template-columns: 49% 49%;
+      grid-gap: 2%;
+    }
+    #node-input-tenants-container .mimir-host-tenants-container .tenant-name,
+    #node-input-tenants-container .mimir-host-tenants-container .tenant-api-key,
+    #node-input-custom-base-urls-container .mimir-host-custom-base-urls-container .tenant-name,
+    #node-input-custom-base-urls-container .mimir-host-custom-base-urls-container .tenant-base-url {
+      width: 100%;
+    }
+    .red-ui-editor .form-row .full-width-label {
+      width: unset;
+    }
+  </style>
+
+  <div class="form-row">
+    <label for="node-config-input-name">
+      <i class="fa fa-tag"></i>
+      Label
+    </label>
+    <input type="text" id="node-config-input-name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-baseUrl">
+      <i class="fa fa-wrench"></i>
+      Base Url
+    </label>
+    <input type="text" id="node-config-input-baseUrl" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-tenants" class="full-width-label">
+      <i class="fa fa-key"></i>
+      Tenants (API Keys)
+    </label>
+    <div class="form-row mimir-host-tenants-form-row">
+      <ol id="node-input-tenants-container"></ol>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-customBaseUrls" class="full-width-label">
+      <i class="fa fa-globe"></i>
+      Tenants (Custom Base Urls)
+    </label>
+    <div class="form-row mimir-host-custom-base-urls-form-row">
+      <ol id="node-input-custom-base-urls-container"></ol>
+    </div>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="mimir-host">
+  <p>Configuration for Mimir API.</p>
+
+  <h3>Configuration</h3>
+  <dl class="message-properties">
+    <dt>
+      Label
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Label of the configuration.</dd>
+
+    <dt>
+      Base Url
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Base url for the Mimir REST API (default: https://mimir.mjoll.no).</dd>
+
+    <dt>
+      Tenants (API Keys)
+      <span class="property-type">list of tenantName/apiKey</span>
+    </dt>
+    <dd>List of all tenants with their API keys.</dd>
+
+    <dt>
+      Tenants (Custom Base Urls)
+      <span class="property-type">list of tenantName/baseUrl</span>
+    </dt>
+    <dd>List of all tenants with a different base url than the one defined in <code>Base Url</code>.</dd>
+  </dl>
+</script>

@@ -1,0 +1,23 @@
+name: Test and analyze projects
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches: [develop]
+    paths:
+      - 'packages/**'
+      - 'package.json'
+
+  push:
+    branches: [develop, main]
+    paths:
+      - 'packages/**'
+      - 'package.json'
+
+jobs:
+  test-all:
+    name: all
+    uses: ./.github/workflows/test.yml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      ACTION_MONITORING_SLACK: ${{ secrets.ACTION_MONITORING_SLACK }}

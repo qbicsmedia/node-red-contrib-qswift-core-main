@@ -1,0 +1,115 @@
+<script type="text/javascript">
+  RED.nodes.registerType('aws-config', {
+    category: 'config',
+    defaults: {
+      name: {
+        value: 'AWS Config',
+      },
+      region: {
+        value: '',
+        required: true,
+      },
+      authType: {
+        value: 'CREDENTIALS',
+        required: true,
+      },
+    },
+    credentials: {
+      accessKeyId: {
+        type: 'text',
+        required: true,
+      },
+      secretAccessKey: {
+        type: 'password',
+        required: true,
+      },
+      assumeRoleArn: {
+        type: 'text',
+        required: true,
+      },
+    },
+    label: function () {
+      return this.name;
+    },
+    oneditprepare: function () {
+      $('#node-config-input-authType').typedInput({
+        types: [
+          {
+            value: 'authType',
+            options: [
+              {
+                value: 'CREDENTIALS',
+                label: 'Credentials',
+              },
+              // TODO: not yet available
+              // {
+              // 	value: 'ASSUME_ROLE_ARN',
+              // 	label: 'Assume Role Arn (NOT YET IMPLEMENTED)'
+              // }
+            ],
+          },
+        ],
+      });
+
+      $('#node-config-input-authType').on('change', (ev, type, value) => {
+        $('.auth-type-group').each((idx, node) => {
+          $(node).toggle(node.getAttribute('data-type') === value);
+        });
+      });
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="aws-config">
+  <div class="form-row">
+    <label for="node-config-input-name">
+      <i class="fa fa-tag"></i>
+      Label
+    </label>
+    <input type="text" id="node-config-input-name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-region">
+      <i class="fa fa-globe"></i>
+      Region
+    </label>
+    <input type="text" id="node-config-input-region" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-authType">
+      <i class="fa fa-gear"></i>
+      Auth type
+    </label>
+    <input type="text" id="node-config-input-authType" />
+  </div>
+
+  <div class="auth-type-group" data-type="CREDENTIALS">
+    <div class="form-row">
+      <label for="node-config-input-accessKeyId">
+        <i class="fa fa-key"></i>
+        Access Key Id
+      </label>
+      <input type="text" id="node-config-input-accessKeyId" />
+    </div>
+
+    <div class="form-row">
+      <label for="node-config-input-secretAccessKey">
+        <i class="fa fa-key"></i>
+        Secret Access Key
+      </label>
+      <input type="password" id="node-config-input-secretAccessKey" />
+    </div>
+  </div>
+
+  <div class="auth-type-group" data-type="ASSUME_ROLE_ARN">
+    <div class="form-row">
+      <label for="node-config-input-assumeRoleArn">
+        <i class="fa fa-key"></i>
+        Assume Role Arn
+      </label>
+      <input type="text" id="node-config-input-assumeRoleArn" />
+    </div>
+  </div>
+</script>

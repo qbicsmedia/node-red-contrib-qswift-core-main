@@ -1,0 +1,86 @@
+<script type="text/javascript">
+  RED.nodes.registerType('dina-rundown-export', {
+    category: 'Dina',
+    color: '#fb4b4e',
+    defaults: {
+      name: {
+        value: '',
+      },
+      timeout: {
+        value: '30',
+        validate: RED.validators.number(),
+      },
+      output: {
+        value: 'payload',
+      },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: 'dina-logo.png',
+    align: 'left',
+    label: function () {
+      return this.name || 'Dina Rundown Export';
+    },
+    outputLabels: function (index) {
+      return ['success', 'error'][index];
+    },
+    paletteLabel: 'Dina Rundown Export',
+    oneditprepare: function () {
+      $('#node-input-output').typedInput({ types: ['msg'] });
+      $('#node-input-output').typedInput('value', this.output);
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="dina-rundown-export">
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+    <input type="text" id="node-input-name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-timeout">
+      <i class="fa fa-list"></i>
+      Timeout (in seconds)
+    </label>
+
+    <input type="text" id="node-input-timeout" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-output">
+      <i class="fa fa-list"></i>
+      Output
+    </label>
+
+    <input type="text" id="node-input-output" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="dina-rundown-export">
+  <h2>Dina rundown export</h2>
+
+  <p>
+    A created rundown only includes a partial version of its stories. This node collects all story updates which will be
+    sent through the Dina MOS Gateway after a rundown is created. It outputs the created rundown with its updated
+    stories.
+  </p>
+
+  <section>
+    <dt>Configuration</dt>
+    <dd>
+      <p><code>Timeout (in seconds):</code> Timeout for discarding incomplete collection of stories</p>
+      <p><code>Ausgabe</code>: Property name which is added to the message with the output.</p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Input</dt>
+    <dd>
+      <p><code>Dina MOS Gateway</code> node</p>
+    </dd>
+  </section>
+</script>

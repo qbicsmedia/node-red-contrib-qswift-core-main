@@ -1,0 +1,7 @@
+coverage
+node_modules
+.serverless
+.env
+infrastructre/node_modules
+dist
+catalogue.json

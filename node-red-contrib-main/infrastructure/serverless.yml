@@ -1,0 +1,49 @@
+service: node-red-contrib
+frameworkVersion: "3"
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ${env:AWS_REGION, 'eu-west-1'}
+  stage: ${opt:stage, 'dev'}
+  environment:
+    DOMAIN_NAME: ${ssm:/${sls:stage}/node_red_contrib/DOMAIN_NAME}
+    REPOSITORY_NAME: ${ssm:/${sls:stage}/node_red_contrib/REPOSITORY_NAME}
+  logRetentionInDays: 90 # 3 months
+  iam:
+    role:
+      statements:
+        - ${file(resources/role.yml)}
+  deploymentBucket:
+    name: ${self:service}
+
+custom:
+  domainName: ${ssm:/${sls:stage}/node_red_contrib/DOMAIN_NAME}
+  repositoryName: ${ssm:/${sls:stage}/node_red_contrib/REPOSITORY_NAME}
+  upstreamRepo: npm-store
+
+resources:
+  Resources:
+    MyCodeArtifactDomain:
+      Type: AWS::CodeArtifact::Domain
+      Properties:
+        DomainName: ${self:custom.domainName}
+    MyCodeArtifactUpstreamRepository:
+      Type: AWS::CodeArtifact::Repository
+      Properties:
+        RepositoryName: ${self:custom.upstreamRepo}
+        DomainName: !GetAtt MyCodeArtifactDomain.Name
+        ExternalConnections:
+          - public:npmjs
+    MyCodeArtifactRepository:
+      Type: AWS::CodeArtifact::Repository
+      Properties:
+        RepositoryName: ${self:custom.repositoryName}
+        DomainName: !GetAtt MyCodeArtifactDomain.Name
+        Upstreams:
+          - !GetAtt MyCodeArtifactUpstreamRepository.Name
+plugins:
+  - serverless-export-env
+  - serverless-deployment-bucket

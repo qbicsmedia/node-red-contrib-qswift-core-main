@@ -1,0 +1,4 @@
+Effect: "Allow"
+Principal: "*"
+Action: "codeartifact:*"
+Resource: "*"

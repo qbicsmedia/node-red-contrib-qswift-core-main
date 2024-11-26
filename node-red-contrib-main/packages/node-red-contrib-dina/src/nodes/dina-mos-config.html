@@ -1,0 +1,52 @@
+<script type="text/javascript">
+  RED.nodes.registerType('dina-mos-config', {
+    category: 'config',
+    defaults: {
+      name: {
+        value: 'Dina MOS Config',
+      },
+      wsUrl: {
+        value: '',
+        required: true,
+      },
+      headers: {
+        value: '{}',
+      },
+    },
+    icon: 'dina-logo.png',
+    align: 'left',
+    label: function () {
+      return this.name;
+    },
+    oneditprepare: function () {
+      $('#node-config-input-headers').typedInput({ type: 'json', types: ['json'] });
+      $('#node-config-input-headers').typedInput('value', this.headers);
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="dina-mos-config">
+  <div class="form-row">
+    <label for="node-config-input-name">
+      <i class="fa fa-tag"></i>
+      Label
+    </label>
+    <input type="text" id="node-config-input-name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-wsUrl">
+      <i class="fa fa-wrench"></i>
+      Websocket Url
+    </label>
+    <input type="text" id="node-config-input-wsUrl" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-headers">
+      <i class="fa fa-wrench"></i>
+      Headers
+    </label>
+    <input type="text" id="node-config-input-headers" />
+  </div>
+</script>

@@ -1,0 +1,7 @@
+{
+  "name": "infrastructure",
+  "devDependencies": {
+    "serverless-deployment-bucket": "^1.6.0",
+    "serverless-export-env": "^2.2.0"
+  }
+}

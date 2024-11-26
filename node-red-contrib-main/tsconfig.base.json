@@ -1,0 +1,16 @@
+{
+	"compilerOptions": {
+		"incremental": true,
+		"target": "ESNext",
+		"module": "CommonJS",
+		"declaration": true,
+		"sourceMap": true,
+		"strict": true,
+		"moduleResolution": "Node",
+		"isolatedModules": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"composite": true,
+		"resolveJsonModule": true
+	}
+}

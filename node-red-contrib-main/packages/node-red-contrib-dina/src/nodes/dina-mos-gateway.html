@@ -1,0 +1,47 @@
+<script type="text/javascript">
+  RED.nodes.registerType('dina-mos-gateway', {
+    category: 'Dina',
+    color: '#fb4b4e',
+    defaults: {
+      config: {
+        type: 'dina-mos-config',
+        required: true,
+      },
+      name: {
+        value: '',
+      },
+    },
+    inputs: 0,
+    outputs: 1,
+    icon: 'dina-logo.png',
+    align: 'left',
+    label: function () {
+      return this.name || 'Dina MOS Gateway';
+    },
+    paletteLabel: 'Dina MOS Gateway',
+  });
+</script>
+
+<script type="text/html" data-template-name="dina-mos-gateway">
+  <div class="form-row">
+    <label for="node-input-config">
+      <i class="fa fa-user"></i>
+      Dina MOS Config
+    </label>
+    <input type="text" id="node-input-config" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+    <input type="text" id="node-input-name" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="dina-mos-gateway">
+  <h2>Websocket connection to the Dina MOS Gateway</h2>
+
+  <p>This node is used as input for the <code>Dina rundown export</code> node.</p>
+</script>

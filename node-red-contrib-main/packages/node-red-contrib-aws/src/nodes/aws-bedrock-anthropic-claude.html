@@ -1,0 +1,400 @@
+<script type="text/javascript">
+  RED.nodes.registerType('aws-bedrock-anthropic-claude', {
+    category: 'AWS',
+    color: '#dddddd',
+    defaults: {
+      config: {
+        type: 'aws-config',
+        required: true,
+      },
+      name: {
+        value: '',
+      },
+      region: {
+        value: '',
+        required: true,
+      },
+      model: {
+        value: '',
+        required: true,
+      },
+      anthropicVersion: {
+        value: 'bedrock-2023-05-31',
+        required: true,
+      },
+      maxTokens: {
+        value: 1000,
+        validate: function (value, opt) {
+          if (!isNaN(value) && parseInt(value, 10) > 0) {
+            return true;
+          }
+
+          return opt ? RED._('validator.errors.invalid-num') : false;
+        },
+        required: true,
+      },
+      output: {
+        value: 'payload',
+      },
+      contentOnly: {
+        value: false,
+      },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: 'amazon.png',
+    align: 'left',
+    label: function () {
+      return this.name || this.paletteLabel;
+    },
+    paletteLabel: 'Anthropic Claude',
+    outputLabels: function (index) {
+      return ['success', 'error'][index];
+    },
+    oneditprepare: function () {
+      let lastRegionValue = '';
+      // https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-regions.html
+      const availableRegions = [
+        'us-east-1', // US East (N. Virginia)
+        'us-west-2', // US West (Oregon)
+        'ap-southeast-1', // Asia Pacific (Singapore)
+        'ap-southeast-2', // Asia Pacific (Sydney)
+        'ap-northeast-1', // Asia Pacific (Tokyo)
+        'ap-south-1', // Asia Pacific (Mumbai)
+        'eu-central-1', // Europe (Frankfurt)
+        'eu-west-1', // Europe (Ireland)
+        'eu-west-3', // Europe (Paris)
+      ].sort();
+
+      // TYPED INPUTS
+      $('#node-input-region').typedInput(createDropdownOptions('region', availableRegions));
+      $('#node-input-model').typedInput(createDropdownOptions('model', ['']));
+
+      $('#node-input-output').typedInput({ types: ['msg'] });
+      $('#node-input-output').typedInput('value', this.output);
+
+      const awsEditorRoot = 'aws-editor';
+      const listModels = region => {
+        const configId = $('#node-input-config').get(0).value;
+
+        $('#node-input-model').typedInput('disable');
+
+        $.getJSON(`${awsEditorRoot}/bedrock/anthropic/models?config=${configId}&region=${region}`)
+          .done(modelList => {
+            const options = modelList.map(({ modelId, modelArn }) => ({
+              label: modelId,
+              value: modelArn,
+            }));
+            const availableModelArns = modelList.map(({ modelArn }) => modelArn);
+            const selectedModel = availableModelArns.includes(this.model) ? this.model : null;
+
+            $('#node-input-model').typedInput('types', [{ value: 'model', options }]);
+            $('#node-input-model').typedInput('value', selectedModel);
+          })
+          .fail((jqXHR, textStatus, errorThrown) => {
+            console.error(`Could not retrieve models list (cause: ${errorThrown}).`);
+          })
+          .always(() => {
+            $('#node-input-model').typedInput('enable');
+          });
+      };
+
+      $('#node-input-region').on('change', ev => {
+        if (lastRegionValue !== ev.target.value) {
+          lastRegionValue = ev.target.value;
+          listModels(lastRegionValue);
+        }
+      });
+
+      $('#node-input-content-only').prop('checked', this.contentOnly);
+    },
+    oneditsave: function () {
+      this.contentOnly = $('#node-input-content-only').prop('checked');
+    },
+  });
+
+  function createDropdownOptions(propertyName, options) {
+    return {
+      type: propertyName,
+      types: [
+        {
+          value: propertyName,
+          options,
+        },
+      ],
+    };
+  }
+</script>
+
+<script type="text/html" data-template-name="aws-bedrock-anthropic-claude">
+  <style>
+    #content-only-section {
+      display: flex;
+    }
+    #content-only-section .content-only-option {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    #content-only-section .content-only-option label {
+      width: unset;
+      margin-bottom: 0;
+    }
+    #content-only-section .content-only-option [type='checkbox'] {
+      width: unset;
+      margin: 0 0.5em 0 0.25em;
+    }
+  </style>
+
+  <div class="form-row">
+    <label for="node-input-config">
+      <i class="fa fa-tag"></i>
+      Auth
+    </label>
+    <input type="text" id="node-input-config" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+    <input type="text" id="node-input-name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-region">
+      <i class="fa fa-globe"></i>
+      Region
+    </label>
+    <input type="text" id="node-input-region" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-model">
+      <i class="fa fa-gear"></i>
+      Model
+    </label>
+    <input type="text" id="node-input-model" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-anthropicVersion">
+      <i class="fa fa-gear"></i>
+      Anthropic Version
+    </label>
+    <input type="text" id="node-input-anthropicVersion" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-maxTokens">
+      <i class="fa fa-gear"></i>
+      Max tokens
+    </label>
+    <input type="text" id="node-input-maxTokens" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-output">
+      <i class="fa fa-list"></i>
+      Output
+    </label>
+
+    <input id="node-input-output" type="text" />
+  </div>
+
+  <div class="form-row" id="content-only-section">
+    <label>&nbsp;</label>
+
+    <div class="content-only-option">
+      <input type="checkbox" id="node-input-content-only" />
+      <label for="node-input-content-only"> Output content only </label>
+    </div>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="aws-bedrock-anthropic-claude">
+  <p>Node for Anthropic Claude of AWS Bedrock.</p>
+
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>
+      payload.text
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Prompt text for Anthropic Claude as user input.</dd>
+
+    <dt class="optional">
+      payload.assistant
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Pre-fill part of Claude's response.</dd>
+
+    <dt class="optional">
+      payload.system
+      <span class="property-type">string</span>
+    </dt>
+    <dd>System prompt to provide context and instructions to Claude.</dd>
+
+    <dt class="optional">
+      payload.maxTokens
+      <span class="property-type">number</span>
+    </dt>
+    <dd>The maximum number of tokens to generate before stopping.</dd>
+
+    <dt class="optional">
+      payload.temperature
+      <span class="property-type">number</span>
+    </dt>
+    <dd>Amount of randomness injected into the response.</dd>
+  </dl>
+
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <ol class="node-ports">
+      <li>
+        Output (success)
+        <dl class="message-properties">
+          <dt>
+            payload
+            <span class="property-type">object | string</span>
+          </dt>
+          <dd>
+            Response of Claude depending on configured <code>Output content only</code> (see Details
+            for more information).
+          </dd>
+        </dl>
+      </li>
+
+      <li>
+        Output (error)
+        <dl class="message-properties">
+          <dt>
+            error
+            <span class="property-type">string</span>
+          </dt>
+          <dd>Error message</dd>
+        </dl>
+      </li>
+    </ol>
+  </dl>
+
+  <h3>Configuration</h3>
+  <dl class="message-properties">
+    <dt>
+      Auth
+      <span class="property-type">aws-config</span>
+    </dt>
+    <dd>Authentication for the AWS account.</dd>
+
+    <dt>
+      Name
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Displayed label of the node.</dd>
+
+    <dt>
+      Region
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Region of the used model.</dd>
+
+    <dt>
+      Model
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      Anthropic Claude model which depends on selected region. The model also has to be accessible
+      per region.
+    </dd>
+
+    <dt>
+      Anthropic Version
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Anthropic version of AWS Bedrock.</dd>
+
+    <dt>
+      Max tokens
+      <span class="property-type">number</span>
+    </dt>
+    <dd>
+      The maximum number of tokens to generate before stopping. This property can be overwritten by
+      <code>msg.payload.maxTokens</code>.
+    </dd>
+
+    <dt>
+      Output
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      Property of the <code>msg</code> object where to store the output. For more information about
+      <code>Output content only</code> see Details section.
+    </dd>
+  </dl>
+
+  <h3>Details</h3>
+  <p>
+    This node is a wrapper for the message API of the
+    <a href="https://docs.anthropic.com/en/docs/intro-to-claude" target="_blank">
+      Anthropic Claude model
+    </a>
+    of <a href="https://aws.amazon.com/bedrock/" target="_blank">AWS Bedrock</a>.
+  </p>
+  <p><code>msg.payload</code> is used to configure the Anthropic Claude model.</p>
+  <p>
+    The only required property of <code>msg.payload</code> is <code>text</code> which serves as user
+    prompt.
+  </p>
+  <p>
+    For all the other optional properties please check out the technical docs in the
+    <code>References</code> section below.
+  </p>
+
+  <h4>Technical note</h4>
+  <p>
+    The message API uses a list and consists of at least one entry which is the user input with role
+    "user". If <code>assistant</code> is also used then this will be added as second entry with role
+    "assistent".
+  </p>
+
+  <h4>Output content only</h4>
+  <p>
+    If the configuration <code>Output content only</code> is checked then the text content of the
+    Claude response object will be extracted and stored in the <code>msg.output</code> property.
+    Otherwise the output will be the whole Claude response object.
+  </p>
+
+  <h3>Examples</h3>
+  <h4>Simple example</h4>
+  <p>
+    <pre><code>  msg.payload = {
+    text: 'Tell me about the capital city of Norway'
+  };</code></pre>
+  </p>
+
+  <h4>Text summarization</h4>
+  <p>
+    <pre><code>  msg.payload = {
+    assistant: 'Text summary:',
+    text: '&lt;insert text to summarize&gt;'
+  };</code></pre>
+  </p>
+
+  <h3>References</h3>
+  <ul>
+    <li>
+      <a href="https://docs.anthropic.com/en/api/messages" target="_blank">
+        Anthropic Claude technical docs
+      </a>
+    </li>
+    <li>
+      <a
+        href="https://docs.anthropic.com/en/api/messages-examples#basic-request-and-response"
+        target="_blank"
+      >
+        Claude response object
+      </a>
+    </li>
+  </ul>
+</script>

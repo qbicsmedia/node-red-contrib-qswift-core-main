@@ -1,0 +1,215 @@
+<script type="text/javascript">
+  const textOnlyOptionUrlTypes = ['srtUrl', 'vttUrl', 'translationSrtUrl', 'translationVttUrl'];
+
+  RED.nodes.registerType('mimir-download', {
+    category: 'Mimir',
+    color: '#68b0c0',
+    defaults: {
+      name: {
+        value: '',
+      },
+      urlType: {
+        value: 'srtUrl',
+      },
+      transformEnabled: {
+        value: false,
+      },
+      output: {
+        value: 'payload',
+      },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: 'mimir-logo.png',
+    align: 'left',
+    label: function () {
+      return this.name || this.paletteLabel;
+    },
+    paletteLabel: 'Mimir Download',
+    outputLabels: function (index) {
+      return ['success', 'error'][index];
+    },
+    oneditprepare: function () {
+      $('#node-input-urlType').typedInput({
+        types: [
+          {
+            value: 'urlType',
+            options: [
+              { value: 'srtUrl', label: 'srtUrl' },
+              { value: 'vttUrl', label: 'vttUrl' },
+              { value: 'translationSrtUrl', label: 'translationSrtUrl' },
+              { value: 'translationVttUrl', label: 'translationVttUrl' },
+              { value: 'timedTranscriptUrl', label: 'timedTranscriptUrl' },
+              { value: 'timedTranslatedTranscriptUrl', label: 'timedTranslatedTranscriptUrl' },
+            ],
+          },
+        ],
+      });
+
+      $('#node-input-urlType').on('change', (ev, type, value) => {
+        $('#form-row-transform-options').toggle(textOnlyOptionUrlTypes.includes(value));
+      });
+
+      $('#node-input-textOnly').prop('checked', this.transformEnabled);
+
+      $('#node-input-output').typedInput({
+        types: ['msg'],
+        value: this.output,
+      });
+    },
+    oneditsave: function () {
+      const urlType = $('#node-input-urlType').typedInput('value');
+      const canHaveTransform = textOnlyOptionUrlTypes.includes(urlType);
+
+      this.transformEnabled = canHaveTransform && $('#node-input-textOnly').prop('checked');
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="mimir-download">
+  <style>
+    .custom-content {
+      display: flex;
+    }
+
+    .custom-content .custom-checkbox-item {
+      display: flex;
+      align-items: center;
+    }
+
+    .custom-content .custom-checkbox-item [type='checkbox'] {
+      width: unset;
+      margin: 0 0.5em 0 0.25em;
+    }
+
+    .custom-content .custom-checkbox-item label {
+      width: unset;
+      margin: 0;
+    }
+  </style>
+
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+    <input type="text" id="node-input-name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-urlType">
+      <i class="fa fa-globe"></i>
+      URL Type
+    </label>
+    <input type="text" id="node-input-urlType" />
+  </div>
+
+  <div class="form-row custom-content" id="form-row-transform-options">
+    <label>&nbsp;</label>
+
+    <div class="custom-checkbox-item">
+      <input type="checkbox" id="node-input-textOnly" />
+      <label for="node-input-textOnly"> Text only (without inline annotations) </label>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-output">
+      <i class="fa fa-list"></i>
+      Output
+    </label>
+
+    <input id="node-input-output" type="text" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="mimir-download">
+  <p>
+  	Downloads content from configured Mimir item url.
+  </p>
+
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+  	<dt>
+  		payload
+  		<span class="property-type">Mimir item</span>
+  	</dt>
+  	<dd>Mimir item which should be used.</dd>
+  </dl>
+
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+  	<ol class="node-ports">
+  		<li>
+  			Output (success)
+  			<dl class="message-properties">
+  				<dt>
+  					payload
+  					<span class="property-type">object</span>
+  				</dt>
+  				<dd>Object with properties <code>text</code> and <code>languageCode</code> or <code>text</code> or <code>timedTranscriptions</code> depending on configured <code>urlType</code>.</dd>
+  			</dl>
+  		</li>
+
+  		<li>
+  			Output (error)
+  			<dl class="message-properties">
+  				<dt>
+  					error
+  					<span class="property-type">object</span>
+  				</dt>
+  				<dd>Occurred error</dd>
+  			</dl>
+  		</li>
+  	</ol>
+  </dl>
+
+  <h3>Configuration</h3>
+  <dl class="message-properties">
+  	<dt>
+  		Name
+  		<span class="property-type">string</span>
+  	</dt>
+  	<dd>Displayed label of the node.</dd>
+
+  	<dt>
+  		URL Type
+  		<span class="property-type">dropdown</span>
+  	</dt>
+  	<dd>
+  		Url property of provided Mimir item which should be downloaded.
+  		Some options provide the possibility to transform the downloaded content further so there is just the transcribed text without inline annotations.
+  	</dd>
+
+  	<dt>
+  		Output
+  		<span class="property-type">string</span>
+  	</dt>
+  	<dd>Property of the <code>msg</code> object where to store the result.</dd>
+  </dl>
+
+  <h3>Details</h3>
+  <p><code>msg.payload</code> is used as input (Mimir item) to get the url from the configured property. The content is downloaded from that url.</p>
+  <p>
+  	Following property options provide the possibility to transform the downloaded content further to get just the text without the inline annotations:
+  	<ul>
+  		<li>srtUrl</li>
+  		<li>vttUrl</li>
+  		<li>translationSrtUrl</li>
+  		<li>translationVttUrl</li>
+  	</ul>
+  	The output of these are an object with the properties <code>text</code> and <code>languageCode</code>.
+  </p>
+  <p>
+  	The remaining property options will produce an array of timedTranscription items:
+  	<ul>
+  		<li>timedTranscriptUrl</li>
+  		<li>timedTranslatedTranscriptUrl</li>
+  	</ul>
+  	The output of these are an object with the properties <code>timedTranscriptions</code> and <code>languageCode</code>.
+  </p>
+  <p>
+  	The <code>languageCode</code> is extracted from either <code>languageCode</code> (default language) or <code>translationLanguage</code> (translated language).
+  </p>
+  <p>On error the message will be sent through the second output with the error as <code>msg.error</code>.</p>
+</script>

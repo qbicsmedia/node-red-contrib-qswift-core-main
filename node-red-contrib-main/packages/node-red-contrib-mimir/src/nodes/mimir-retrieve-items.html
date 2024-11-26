@@ -1,0 +1,188 @@
+<script type="text/javascript">
+  RED.nodes.registerType('mimir-retrieve-items', {
+    category: 'Mimir',
+    color: '#68b0c0',
+    defaults: {
+      host: {
+        type: 'mimir-host',
+        required: true,
+      },
+      name: {
+        value: '',
+      },
+      output: {
+        value: 'payload',
+      },
+      outputAsList: {
+        value: false,
+      },
+      tenantPath: {
+        value: 'req.query.tenant',
+      },
+      tenantPathType: {
+        value: 'msg',
+      },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: 'mimir-logo.png',
+    align: 'left',
+    label: function () {
+      return this.name || 'Mimir Retrieve Items';
+    },
+    paletteLabel: 'Mimir Retrieve Items',
+    outputLabels: function (index) {
+      return ['success', 'error'][index];
+    },
+    oneditprepare: function () {
+      $('#node-input-output').typedInput({ types: ['msg'] });
+      $('#node-input-output').typedInput('value', this.output);
+
+      $('#node-input-outputAsList').prop('checked', !!this.outputAsList);
+
+      $('#node-input-tenant-path').typedInput({ types: ['msg', 'flow', 'global'] });
+      $('#node-input-tenant-path').typedInput('type', this.tenantPathType ?? 'msg');
+      $('#node-input-tenant-path').typedInput('value', this.tenantPath);
+    },
+    oneditsave: function () {
+      this.outputAsList = $('#node-input-outputAsList').is(':checked');
+
+      this.tenantPath = $('#node-input-tenant-path').typedInput('value');
+      this.tenantPathType = $('#node-input-tenant-path').typedInput('type');
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="mimir-retrieve-items">
+  <style>
+    #node-input-outputAsList {
+      width: unset;
+      margin: 0 5px;
+    }
+    #node-input-outputAsList + label {
+      width: unset;
+      margin-bottom: 0;
+    }
+    .output-as-list-row {
+      display: flex;
+      align-items: center;
+    }
+  </style>
+
+  <div class="form-row">
+    <label for="node-input-host">
+      <i class="fa fa-user"></i>
+      Mimir Auth
+    </label>
+    <input type="text" id="node-input-host" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+    <input type="text" id="node-input-name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-output">
+      <i class="fa fa-list"></i>
+      Output
+    </label>
+
+    <input type="text" id="node-input-output" />
+  </div>
+
+  <div class="form-row output-as-list-row">
+    <label></label>
+
+    <input type="checkbox" id="node-input-outputAsList" />
+    <label for="node-input-outputAsList"> Output items as list </label>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant-path">
+      <i class="fa fa-list"></i>
+      Tenant path
+    </label>
+
+    <input id="node-input-tenant-path" type="text" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="mimir-retrieve-items">
+  <section>
+    <dd>
+      <p>
+        The <a href="https://mimir.mjoll.no/doc/api.html#tag/Item/paths/~1api~1v1~1items/get" target="_blank">poll api</a> does not return all data for every item.
+        This node uses the <a href="https://mimir.mjoll.no/doc/api.html#tag/Item/paths/~1api~1v1~1items~1%7BitemId%7D/get" target="_blank">retrieve api</a> for every item id in the given list to get all data for every item.
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Input</dt>
+    <dd>
+      <p>The only one required property is <code>itemIds</code> on the message object.</p>
+      <p>Example: <pre><code>  msg.itemIds = [
+    '1e2a9953-af54-71b8-aadd-9a5e1b16b8cf',
+    'ccd43f22-8c4c-ece7-8285-7642cde55c35',
+    'e640a6c4-5a31-54be-6c03-9ac09d63f338'
+  ];</code></pre>
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Output</dt>
+    <dd>
+      <p>Output will be at the <code>payload</code> property of the message by default if not defined here otherwise.</p>
+      <p>
+        The output will be one of the following two depending on <code>Output items as list</code> flag:
+        <ul>
+          <li>key/value mapping (see Example 1), if flag is not checked</li>
+          <li>list of items (see Example 2), if flag is checked</li>
+        </ul>
+      </p>
+      <p>
+        Example 1: <pre><code>  {
+    '1e2a9953-af54-71b8-aadd-9a5e1b16b8cf': MimirItem,
+    'ccd43f22-8c4c-ece7-8285-7642cde55c35': MimirItem,
+    'e640a6c4-5a31-54be-6c03-9ac09d63f338': MimirItem
+  }</code></pre>
+      </p>
+      <p>
+        Example 2: <pre><code>  [
+    MimirItem,
+    MimirItem,
+    MimirItem
+  ]</code></pre>
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Tenant path (used only on authType "Tenants")</dt>
+    <dd>
+      <p>
+        Path from <code>msg</code>, <code>flow</code> or <code>global</code> to get the tenant name from.
+      </p>
+
+      <p>
+        Rejects with error <code>Invalid tenant!</code> if tenant name is not a string or is an empty string.<br />
+        Rejects with error <code>Tenant "&lt;TENANT_NAME&gt;" not found!</code> if tenant name cannot be found in config list.
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Node outputs</dt>
+    <dd>
+      <p>
+        On success the message will be sent through the first output.<br />
+        On error the message will be sent through the second output with the <a href="https://github.com/axios/axios#handling-errors" target="_blank">http error</a> as <code>error</code> attached.
+      </p>
+    </dd>
+  </section>
+</script>

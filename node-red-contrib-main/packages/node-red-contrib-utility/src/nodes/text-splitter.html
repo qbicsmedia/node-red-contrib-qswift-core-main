@@ -1,0 +1,146 @@
+<script type="text/javascript">
+  RED.nodes.registerType('text-splitter', {
+    category: 'Utility',
+    color: '#dddddd',
+    defaults: {
+      name: {
+        value: '',
+      },
+      maxChunkChars: {
+        value: 500,
+        validate: function (value, opt) {
+          if (!isNaN(value) && parseInt(value, 10) > 0) {
+            return true;
+          }
+
+          return opt ? RED._('validator.errors.invalid-num') : false;
+        },
+      },
+      output: {
+        value: 'payload',
+      },
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: 'split.svg',
+    align: 'left',
+    label: function () {
+      return this.name || this.paletteLabel;
+    },
+    paletteLabel: 'Text Splitter',
+    outputLabels: function (index) {
+      return ['success', 'error'][index];
+    },
+    oneditprepare: function () {
+      $('#node-input-output').typedInput({ types: ['msg'] });
+      $('#node-input-output').typedInput('value', this.output);
+    },
+    oneditsave: function () {
+      this.maxChunkChars = parseInt($('#node-input-maxChunkChars').val(), 10);
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="text-splitter">
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+    <input type="text" id="node-input-name" placeholder="" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-maxChunkChars">
+      <i class="fa fa-gear"></i>
+      Max chunk chars
+    </label>
+    <input type="text" id="node-input-maxChunkChars" placeholder="" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-output">
+      <i class="fa fa-list"></i>
+      Output
+    </label>
+
+    <input id="node-input-output" type="text" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="text-splitter">
+  <p>
+  	Splits a string into chunks close to configured maximum chunk character limit in respect to sentences and words.
+  </p>
+
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+  	<dt>
+  		payload
+  		<span class="property-type">string</span>
+  	</dt>
+  	<dd>Text which should be split into chunks.</dd>
+  </dl>
+
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+  	<ol class="node-ports">
+  		<li>
+  			Output
+  			<dl class="message-properties">
+  				<dt>
+  					payload
+  					<span class="property-type">array of strings</span>
+  				</dt>
+  				<dd>
+  					Provided text split into chunks.
+  				</dd>
+  			</dl>
+  		</li>
+  	</ol>
+  </dl>
+
+  <h3>Configuration</h3>
+  <dl class="message-properties">
+  	<dt>
+  		Name
+  		<span class="property-type">string</span>
+  	</dt>
+  	<dd>Displayed label of the node.</dd>
+
+  	<dt>
+  		Max chunk chars
+  		<span class="property-type">number</span>
+  	</dt>
+  	<dd>Maximum characters for a chunk.</dd>
+
+  	<dt>
+  		Output
+  		<span class="property-type">string</span>
+  	</dt>
+  	<dd>Property of the <code>msg</code> object where to store the output.</dd>
+  </dl>
+
+  <h3>Details</h3>
+  <p>
+  	<code>msg.payload</code> is used as input string which is split into chunks of maximum configured chunk characters.
+  	Then the chunk is scanned for dots, exclamation marks and question marks which end sentences.
+  	The naive implementation is as follows:
+  </p>
+  <p>
+  	<ul>
+  		<li>
+  			If one or more of these are found then it is determined which is nearest to the end of the chunk and there it will be split.
+  		</li>
+  		<li>
+  			If none of these are found then the nearest empty space to the end of the chunk is determined for the split.
+  		</li>
+  		<li>
+  			If there are no empty spaces the whole chunk will be used.
+  		</li>
+  	</ul>
+  </p>
+  <p>
+  	The message will be sent through the output and the result will be stored in <code>msg.payload</code> (configurable).
+  </p>
+</script>

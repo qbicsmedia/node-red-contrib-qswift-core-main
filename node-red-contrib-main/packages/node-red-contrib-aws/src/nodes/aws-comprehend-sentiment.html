@@ -1,0 +1,240 @@
+<script type="text/javascript">
+  RED.nodes.registerType('aws-comprehend-sentiment', {
+    category: 'AWS',
+    color: '#dddddd',
+    defaults: {
+      config: {
+        type: 'aws-config',
+        required: true,
+      },
+      name: {
+        value: '',
+      },
+      languageCode: {
+        value: 'languageCode',
+      },
+      output: {
+        value: 'payload',
+      },
+      logging: {
+        value: false,
+      },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: 'amazon.png',
+    align: 'left',
+    label: function () {
+      return this.name || this.paletteLabel;
+    },
+    paletteLabel: 'AWS Comprehend Sentiment',
+    outputLabels: function (index) {
+      return ['success', 'error'][index];
+    },
+    oneditprepare: function () {
+      $('#node-input-languageCode').typedInput({ types: ['msg'] });
+      $('#node-input-languageCode').typedInput('value', this.languageCode);
+
+      $('#node-input-output').typedInput({ types: ['msg'] });
+      $('#node-input-output').typedInput('value', this.output);
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="aws-comprehend-sentiment">
+  <style>
+    .form-row-checkbox input[type='checkbox'] {
+      width: unset;
+      margin: 0;
+    }
+  </style>
+
+  <div class="form-row">
+    <label for="node-input-config">
+      <i class="fa fa-tag"></i>
+      Auth
+    </label>
+    <input type="text" id="node-input-config" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+    <input type="text" id="node-input-name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-languageCode">
+      <i class="fa fa-globe"></i>
+      Language Code
+    </label>
+
+    <input id="node-input-languageCode" type="text" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-output">
+      <i class="fa fa-list"></i>
+      Output
+    </label>
+
+    <input id="node-input-output" type="text" />
+  </div>
+
+  <div class="form-row form-row-checkbox">
+    <label for="node-input-logging">
+      <i class="fa fa-terminal"></i>
+      Logging
+    </label>
+
+    <input id="node-input-logging" type="checkbox" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="aws-comprehend-sentiment">
+  <style>
+    .red-ui-help ol.node-ports .sublist li {
+      border: none;
+    }
+  </style>
+
+  <p>
+    Inspects text and returns an inference of the prevailing sentiment.
+  </p>
+
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>
+      payload
+      <span class="property-type">array of strings</span>
+    </dt>
+    <dd>Text (document) which should be analyzed.</dd>
+
+    <dt>
+      languageCode
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      Language code of the provided text (configurable).
+      List of supported languages can be found in the <code>References</code> section.
+    </dd>
+  </dl>
+
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <ol class="node-ports">
+      <li>
+        Output (success)
+        <dl class="message-properties">
+          <dt>
+            payload
+            <span class="property-type">object</span>
+          </dt>
+          <dd>Result of the processed text will be available at the configured property name (see <code>Configuration Output</code>).</dd>
+        </dl>
+      </li>
+
+      <li>
+        Output (error)
+        <dl class="message-properties">
+          <dt>
+            error
+            <span class="property-type">string</span>
+          </dt>
+          <dd>Error message</dd>
+        </dl>
+      </li>
+    </ol>
+  </dl>
+
+  <h3>Configuration</h3>
+  <dl class="message-properties">
+    <dt>
+      Auth
+      <span class="property-type">aws-config</span>
+    </dt>
+    <dd>Authentication for the AWS account.</dd>
+
+    <dt>
+      Name
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Displayed label of the node.</dd>
+
+    <dt>
+      Language Code
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Property of the <code>msg</code> object where to get the <code>languageCode</code> from.</dd>
+
+    <dt>
+      Output
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Property of the <code>msg</code> object where to store the output.</dd>
+
+    <dt>
+      Logging
+      <span class="property-type">boolean</span>
+    </dt>
+    <dd>Enable additional logging information.</dd>
+  </dl>
+
+  <h3>Details</h3>
+  <p>
+    <strong>IMPORTANT</strong>: Due to some limitations of the AWS Comprehend Sentiment API this node expects UTF-8 strings with a maximum of 5000 bytes.
+    Although this limitation only the first 500 characters will be analyzed. If a string is longer than 5000 bytes it will be cut to that limit.
+  </p>
+
+  <p>
+    The text (document) will be processed and returns an object with the following properties:
+    <ul>
+      <li><code>Sentiment</code></li>
+      <li><code>SentimentScore</code></li>
+    </ul>
+  </p>
+  <p>
+    <code>msg.payload</code> is used as text (document) which is sent to AWS Comprehend API with the given language code at <code>msg.languageCode</code> (configurable).
+  </p>
+  <p>
+    On success the message will be sent through the first output with the result as <code>msg.payload</code> (configurable).
+    Result of the sentiment detection as object with <code>Sentiment</code> and <code>SentimentScore</code> as properties.
+    <p>
+      Used objects:
+      <ul class="sublist">
+        <li>
+          <code>Sentiment</code>
+          is a string and can be one of the following: <code>POSITIVE</code>, <code>NEUTRAL</code>, <code>MIXED</code> or <code>NEGATIVE</code>
+        </li>
+
+        <li>
+          <code>SentimentScore</code>
+          is an object with the properties <code>Mixed</code>, <code>Negative</code>, <code>Neutral</code> and <code>Positive</code>
+        </li>
+      </ul>
+    </p>
+
+    <p>
+      Result example: <pre><code>  {
+    Sentiment: 'POSITIVE',
+    SentimentScore: {
+      Mixed: 0.0012797467643395066,
+      Negative: 0.03045184724032879,
+      Neutral: 0.2897490859031677,
+      Positive: 0.6785192489624023
+    }
+  }</code></pre>
+    </p>
+  </p>
+  <p>
+    On error the message will be sent through the second output with the error message as <code>msg.error</code>.
+  </p>
+
+  <h3>References</h3>
+  <ul>
+    <li><a href="https://docs.aws.amazon.com/comprehend/latest/APIReference/API_DetectSentiment.html" target="_blank">DetectSentiment</a></li>
+    <li><a href="https://boto3.amazonaws.com/v1/documentation/api/1.26.60/reference/services/comprehend.html#Comprehend.Client.detect_sentiment" target="_blank">500 Character analysis limitation</a> (only documented in python version)</li>
+  </ul>
+</script>

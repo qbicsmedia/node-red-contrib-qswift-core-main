@@ -1,0 +1,196 @@
+<script type="text/javascript">
+  RED.nodes.registerType('mimir-transferRequests', {
+    category: 'Mimir',
+    color: '#68b0c0',
+    defaults: {
+      host: {
+        type: 'mimir-host',
+        required: true,
+      },
+      name: {
+        value: '',
+      },
+      operation: {
+        value: 'get',
+      },
+      output: {
+        value: 'payload',
+      },
+      tenantPath: {
+        value: 'req.query.tenant',
+      },
+      tenantPathType: {
+        value: 'msg',
+      },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: 'mimir-logo.png',
+    align: 'left',
+    label: function () {
+      return this.name || `Transfer Request ${this.operation}`;
+    },
+    paletteLabel: 'Mimir Transfer Request',
+    outputLabels: function (index) {
+      return ['success', 'error'][index];
+    },
+    oneditprepare: function () {
+      $('#node-input-operation').typedInput({
+        types: [
+          {
+            value: 'operation',
+            options: [
+              { value: 'getAll', label: 'Get all transfer requests' },
+              { value: 'create', label: 'Create a transfer request' },
+              { value: 'get', label: 'Get a transfer request' },
+              { value: 'lock', label: 'Getting an exclusive lock on a transfer request' },
+              { value: 'delete', label: 'Delete a transfer request' },
+            ],
+          },
+        ],
+      });
+
+      $('#node-input-output').typedInput({
+        type: 'msg',
+        types: ['msg'],
+        value: this.output,
+      });
+
+      $('#node-input-tenant-path').typedInput({ types: ['msg', 'flow', 'global'] });
+      $('#node-input-tenant-path').typedInput('type', this.tenantPathType ?? 'msg');
+      $('#node-input-tenant-path').typedInput('value', this.tenantPath);
+    },
+    oneditsave: function () {
+      this.tenantPath = $('#node-input-tenant-path').typedInput('value');
+      this.tenantPathType = $('#node-input-tenant-path').typedInput('type');
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="mimir-transferRequests">
+  <div class="form-row">
+    <label for="node-input-host">
+      <i class="fa fa-user"></i>
+      Mimir Auth
+    </label>
+
+    <input type="text" id="node-input-host" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+
+    <input type="text" id="node-input-name" placeholder="" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-operation">
+      <i class="fa fa-wrench"></i>
+      Operation
+    </label>
+
+    <input type="text" id="node-input-operation" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-typed-output">
+      <i class="fa fa-list"></i>
+      Output
+    </label>
+    <input id="node-input-output" type="text" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant-path">
+      <i class="fa fa-list"></i>
+      Tenant path
+    </label>
+
+    <input id="node-input-tenant-path" type="text" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="mimir-transferRequests">
+  <h2>
+    Transfer Request Mimir API Node (<a href="https://mimir.mjoll.no/doc/api.html#tag/Transfer-Request" target="_blank"
+      >docs</a
+    >)
+  </h2>
+
+  <section>
+    Following APIs are implemented in this node:
+    <ul>
+      <li>Get all transfer requests</li>
+      <li>Create a transfer request</li>
+      <li>Get a transfer request</li>
+      <li>Getting an exclusive lock on a transfer request</li>
+      <li>Delete a transfer request</li>
+    </ul>
+  </section>
+
+  <section>
+    <dt>Message properties</dt>
+    <dd>
+      <code>storageId</code> is required for all implemented apis.
+      <pre><code>msg.storageId = '798f7206-aa83-4b61-8519-50a8e14148e0';</code></pre>
+
+      <strong>Get/Delete a transfer request</strong> and
+      <strong>Getting an exclusive lock on a transfer request</strong> also need <code>transferRequestId</code> set as
+      property.
+      <pre><code>msg.transferRequestId = '50a8e14148e0-8519-4b61-aa83-798f7206';</code></pre>
+
+      <p>
+        Please refer to the
+        <a href="https://mimir.mjoll.no/doc/api.html#tag/Transfer-Request" target="_blank">docs</a>
+        for more information.
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Get all transfer requests</dt>
+    <dd>
+      <p>
+        will return the collection itself instead of nested
+        <code>_embedded.collection</code> structure.
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Output</dt>
+    <dd>
+      <p>
+        Output will be at the <code>payload</code> property of the message by default if not defined here otherwise.
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Tenant path (used only on authType "Tenants")</dt>
+    <dd>
+      <p>Path from <code>msg</code>, <code>flow</code> or <code>global</code> to get the tenant name from.</p>
+
+      <p>
+        Rejects with error <code>Invalid tenant!</code> if tenant name is not a string or is an empty string.<br />
+        Rejects with error <code>Tenant "&lt;TENANT_NAME&gt;" not found!</code> if tenant name cannot be found in config
+        list.
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Node outputs</dt>
+    <dd>
+      <p>
+        On success the message will be sent through the first output.<br />
+        On error the message will be sent through the second output with the
+        <a href="https://github.com/axios/axios#handling-errors" target="_blank">http error</a> as
+        <code>error</code> attached.
+      </p>
+    </dd>
+  </section>
+</script>

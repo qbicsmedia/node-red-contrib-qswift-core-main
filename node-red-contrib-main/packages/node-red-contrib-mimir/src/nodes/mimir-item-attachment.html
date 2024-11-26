@@ -1,0 +1,283 @@
+<script type="text/javascript">
+  RED.nodes.registerType('mimir-item-attachment', {
+    category: 'Mimir',
+    color: '#68b0c0',
+    defaults: {
+      host: {
+        type: 'mimir-host',
+        required: true,
+      },
+      name: {
+        value: '',
+      },
+      operation: {
+        value: 'getList',
+      },
+      forceOverwrite: {
+        value: false,
+      },
+      output: {
+        value: 'payload',
+      },
+      tenantPath: {
+        value: 'tenant',
+      },
+      tenantPathType: {
+        value: 'msg',
+      },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: 'mimir-logo.png',
+    align: 'left',
+    label: function () {
+      return this.name || this.paletteLabel;
+    },
+    paletteLabel: 'Mimir Item Attachment',
+    outputLabels: function (index) {
+      return ['success', 'error'][index];
+    },
+    oneditprepare: function () {
+      $('#node-input-operation').typedInput({
+        types: [
+          {
+            value: 'operation',
+            options: [
+              { value: 'getList', label: 'Get list of attachments' },
+              { value: 'fetch', label: 'Fetch attachment download url' },
+              { value: 'create', label: 'Create an attachment' },
+              { value: 'update', label: 'Update an attachment' },
+              { value: 'delete', label: 'Delete an attachment' },
+            ],
+          },
+        ],
+      });
+
+      $('#node-input-operation').on('change', (ev, type, value) => {
+        if (value === 'create') {
+          $('#force-overwrite-section').show();
+        } else {
+          $('#force-overwrite-section').hide();
+        }
+      });
+
+      $('#node-input-force-overwrite').prop('checked', this.forceOverwrite);
+
+      $('#node-input-output').typedInput({
+        types: ['msg'],
+        value: this.output,
+      });
+
+      $('#node-input-tenant-path').typedInput({ types: ['msg', 'flow', 'global'] });
+      $('#node-input-tenant-path').typedInput('type', this.tenantPathType ?? 'msg');
+      $('#node-input-tenant-path').typedInput('value', this.tenantPath);
+    },
+    oneditsave: function () {
+      const operation = $('#node-input-operation').typedInput('value');
+      this.forceOverwrite = operation === 'create' ? $('#node-input-force-overwrite').prop('checked') : false;
+
+      this.tenantPath = $('#node-input-tenant-path').typedInput('value');
+      this.tenantPathType = $('#node-input-tenant-path').typedInput('type');
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="mimir-item-attachment">
+  <style>
+    #force-overwrite-section {
+      display: flex;
+    }
+    #force-overwrite-section .force-overwrite-option {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    #force-overwrite-section .force-overwrite-option label {
+      width: unset;
+      margin-bottom: 0;
+    }
+    #force-overwrite-section .force-overwrite-option [type='checkbox'] {
+      width: unset;
+      margin: 0 0.5em 0 0.25em;
+    }
+  </style>
+
+  <div class="form-row">
+    <label for="node-input-host">
+      <i class="fa fa-user"></i>
+      Mimir Auth
+    </label>
+    <input type="text" id="node-input-host" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+    <input type="text" id="node-input-name" placeholder="" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-operation">
+      <i class="fa fa-wrench"></i>
+      Operation
+    </label>
+    <input type="text" id="node-input-operation" />
+  </div>
+
+  <div class="form-row" id="force-overwrite-section">
+    <label>&nbsp;</label>
+
+    <div class="force-overwrite-option">
+      <input type="checkbox" id="node-input-force-overwrite" />
+      <label for="node-input-force-overwrite"> force overwrite </label>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-output">
+      <i class="fa fa-list"></i>
+      Output
+    </label>
+
+    <input id="node-input-output" type="text" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant-path">
+      <i class="fa fa-list"></i>
+      Tenant path
+    </label>
+
+    <input id="node-input-tenant-path" type="text" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="mimir-item-attachment">
+  <p>
+    Manages attachments of Mimir items.
+  </p>
+
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>
+      itemId
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Mimir item id</dd>
+
+    <dt>
+      payload
+      <span class="property-type">object</span>
+    </dt>
+    <dd>Payload according to selected operation.</dd>
+  </dl>
+
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <ol class="node-ports">
+      <li>
+        Output (success)
+        <dl class="message-properties">
+          <dt>
+            payload
+            <span class="property-type">object</span>
+          </dt>
+          <dd>API Response according to selected operation.</dd>
+        </dl>
+      </li>
+
+      <li>
+        Output (error)
+        <dl class="message-properties">
+          <dt>
+            error
+            <span class="property-type">object</span>
+          </dt>
+          <dd>Occurred error</dd>
+        </dl>
+      </li>
+    </ol>
+  </dl>
+
+  <h3>Configuration</h3>
+  <dl class="message-properties">
+    <dt>
+      Auth
+      <span class="property-type">mimir-host</span>
+    </dt>
+    <dd>Authentication for the Mimir account.</dd>
+
+    <dt>
+      Name
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Displayed label of the node.</dd>
+
+    <dt>
+      Operation
+      <span class="property-type">dropdown</span>
+    </dt>
+    <dd>Mimir attachment API which should be used.</dd>
+
+    <dt>
+      Output
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Property of the <code>msg</code> object where to store the result.</dd>
+
+    <dt>
+      Tenant path
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Property where to find the name of the Mimir tenant.</dd>
+  </dl>
+
+  <h3>Details</h3>
+  <p>
+    This node is a wrapper for the <a href="https://mimir.mjoll.no/doc/api.html#tag/Item-Attachment" target="_blank">Mimir Item Attachment API</a>:
+    <ul>
+      <li>Get list of attachments</li>
+      <li>Fetch attachment download url</li>
+      <li>Create an attachment</li>
+      <li>Update an attachment</li>
+      <li>Delete an attachment</li>
+    </ul>
+  </p>
+  <p>Generally the node works according to the documentation whereas the <code>msg.itemId</code> is always required and <code>msg.payload</code> is used for requests with request bodies.</p>
+  <p>On success the message will be sent through the first output with the result as <code>msg.payload</code> (configurable).</p>
+  <p>On error the message will be sent through the second output with the error as <code>msg.error</code>.</p>
+
+  <h4>Fetch attachment download url</h4>
+  <p>This operation uses the same api as <code>Get list of attachments</code>, but <code>msg.attachment</code> is required and it returns the download url for this attachment.</p>
+
+  <h4>Create an attachment</h4>
+  <p>
+    This operation is more complex than the other ones and the multiple steps are handled by the node.
+    <ol>
+      <li>If there is an attachment with same name then throw an error unless <code>force overwrite</code> is enabled (which will delete the current one).</li>
+      <li>Make the actual api call which returns a presigned url.</li>
+      <li>Upload the content of <code>msg.uploadContent</code> to the presigned url (= HTTP PUT request).</li>
+    </ol>
+  </p>
+  <p>
+    Example of message input:<pre><code>  {
+    itemId: MIMIR_ITEM_ID,
+    payload: {
+      fileName: 'attachment.json',
+      type: 'file',
+      role: 'file'
+    },
+    uploadContent: JSON.stringify({
+      title: 'My attachment JSON',
+      data: 'some data here'
+    })
+  }</code></pre>
+  </p>
+
+  <h3>References</h3>
+  <ul>
+    <li><a href="https://mimir.mjoll.no/doc/api.html#tag/Item-Attachment" target="_blank">Mimir Item Attachment API</a></li>
+  </ul>
+</script>

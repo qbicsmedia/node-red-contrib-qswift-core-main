@@ -1,0 +1,129 @@
+<script type="text/javascript">
+  RED.nodes.registerType('dina-graphql', {
+    category: 'Dina',
+    color: '#fb4b4e',
+    defaults: {
+      config: {
+        type: 'dina-graphql-config',
+        required: true,
+      },
+      name: {
+        value: '',
+      },
+      output: {
+        value: 'payload',
+      },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: 'dina-logo.png',
+    align: 'left',
+    label: function () {
+      return this.name || 'Dina GraphQL';
+    },
+    paletteLabel: 'Dina GraphQL',
+    outputLabels: function (index) {
+      return ['success', 'error'][index];
+    },
+    oneditprepare: function () {
+      $('#node-input-output').typedInput({ types: ['msg'] });
+      $('#node-input-output').typedInput('value', this.output);
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="dina-graphql">
+  <div class="form-row">
+    <label for="node-input-config">
+      <i class="fa fa-user"></i>
+      Dina GraphQL Config
+    </label>
+    <input type="text" id="node-input-config" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+    <input type="text" id="node-input-name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-output">
+      <i class="fa fa-list"></i>
+      Output
+    </label>
+
+    <input type="text" id="node-input-output" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="dina-graphql">
+  	<h2>GraphQL Node for Dina API</h2>
+
+  	<section>
+  		<p>This node can be used for general purpose GraphQL requests to the Dina API.</p>
+  	</section>
+
+  	<section>
+  		<dt>Output</dt>
+  		<dd>
+  			<p>Output will be at the <code>payload</code> property of the message by default if not defined here otherwise.</p>
+  		</dd>
+  	</section>
+
+  	<section>
+  		<dt>Input</dt>
+  		<dd>
+  			<p>
+  				Input message payload has to be a GraphQL body with following properties:
+  				<ul>
+  					<li>query: GraphQL query or mutation</li>
+  					<li>operationName: Name of the operation</li>
+  					<li>variables: Variables of the query (if it has any)</li>
+  				</ul>
+  			</p>
+  			<p>Example 1: <pre><code>msg.payload = {
+    query: 'query MyQuery {
+      getSomething {
+        mId,
+        mTitle,
+        mType
+      }
+    }',
+    operationName: 'MyQuery',
+    variables: {}
+  };</code></pre>
+  			</p>
+  			<p>Example 2: <pre><code>msg.payload = {
+    query: 'mutation MyMutation($input: CreateSomethingInput) {
+      createSomething(input: $input) {
+        mTitle
+        mDescription
+        mType
+      }
+    }',
+    operationName: 'MyMutation',
+    variables: {
+      input: {
+        mTitle: 'Title A',
+        mDescription: 'Description A',
+        mType: 'typeA'
+      }
+    }
+  };</code></pre>
+  			</p>
+  		</dd>
+  	</section>
+
+  	<section>
+  		<dt>Node outputs</dt>
+  		<dd>
+  			<p>
+  				On success the message will be sent through the first output.<br />
+  				On error the message will be sent through the second output with the error as <code>error</code> attached.
+  			</p>
+  		</dd>
+  	</section>
+</script>

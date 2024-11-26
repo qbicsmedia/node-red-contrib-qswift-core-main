@@ -1,0 +1,208 @@
+<script type="text/javascript">
+  RED.nodes.registerType('aws-comprehend-entities', {
+    category: 'AWS',
+    color: '#dddddd',
+    defaults: {
+      config: {
+        type: 'aws-config',
+        required: true,
+      },
+      name: {
+        value: '',
+      },
+      languageCode: {
+        value: 'languageCode',
+      },
+      output: {
+        value: 'payload',
+      },
+      logging: {
+        value: false,
+      },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: 'amazon.png',
+    align: 'left',
+    label: function () {
+      return this.name || this.paletteLabel;
+    },
+    paletteLabel: 'AWS Comprehend Entities',
+    outputLabels: function (index) {
+      return ['success', 'error'][index];
+    },
+    oneditprepare: function () {
+      $('#node-input-languageCode').typedInput({ types: ['msg'] });
+      $('#node-input-languageCode').typedInput('value', this.languageCode);
+
+      $('#node-input-output').typedInput({ types: ['msg'] });
+      $('#node-input-output').typedInput('value', this.output);
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="aws-comprehend-entities">
+  <style>
+    .form-row-checkbox input[type='checkbox'] {
+      width: unset;
+      margin: 0;
+    }
+  </style>
+
+  <div class="form-row">
+    <label for="node-input-config">
+      <i class="fa fa-tag"></i>
+      Auth
+    </label>
+    <input type="text" id="node-input-config" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+    <input type="text" id="node-input-name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-languageCode">
+      <i class="fa fa-globe"></i>
+      Language Code
+    </label>
+
+    <input id="node-input-languageCode" type="text" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-output">
+      <i class="fa fa-list"></i>
+      Output
+    </label>
+
+    <input id="node-input-output" type="text" />
+  </div>
+
+  <div class="form-row form-row-checkbox">
+    <label for="node-input-logging">
+      <i class="fa fa-terminal"></i>
+      Logging
+    </label>
+
+    <input id="node-input-logging" type="checkbox" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="aws-comprehend-entities">
+  <p>
+    Detects named entities in given input text.
+  </p>
+
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>
+      payload
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Text which should be analyzed.</dd>
+
+    <dt>
+      languageCode
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      Language code of the provided text (configurable).
+      List of supported languages can be found in the <code>References</code> section.
+    </dd>
+  </dl>
+
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <ol class="node-ports">
+      <li>
+        Output (success)
+        <dl class="message-properties">
+          <dt>
+            payload
+            <span class="property-type">array</span>
+          </dt>
+          <dd>List of detected entities will be available at the configured property name (see <code>Configuration Output</code>).</dd>
+        </dl>
+      </li>
+
+      <li>
+        Output (error)
+        <dl class="message-properties">
+          <dt>
+            error
+            <span class="property-type">string</span>
+          </dt>
+          <dd>Error message</dd>
+        </dl>
+      </li>
+    </ol>
+  </dl>
+
+  <h3>Configuration</h3>
+  <dl class="message-properties">
+    <dt>
+      Auth
+      <span class="property-type">aws-config</span>
+    </dt>
+    <dd>Authentication for the AWS account.</dd>
+
+    <dt>
+      Name
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Displayed label of the node.</dd>
+
+    <dt>
+      Language Code
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Property of the <code>msg</code> object where to get the <code>languageCode</code> from.</dd>
+
+    <dt>
+      Output
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Property of the <code>msg</code> object where to store the output.</dd>
+
+    <dt>
+      Logging
+      <span class="property-type">boolean</span>
+    </dt>
+    <dd>Enable additional logging information.</dd>
+  </dl>
+
+  <h3>Details</h3>
+  <p><code>msg.payload</code> is used as text which is sent to AWS Comprehend API with the given language code at <code>msg.languageCode</code> (configurable).</p>
+  <p><strong>NOTE:</strong> The input text will be cut to the maximum string size of 100000 bytes if it is longer.</p>
+  <p>
+    On success the message will be sent through the first output with an array of entities as <code>msg.payload</code> (configurable).
+    <p>
+      Result example: <pre><code>  [
+    {
+      BeginOffset: 0,
+      EndOffset: 3,
+      Score: 0.9501794576644897,
+      Text: 'One',
+      Type: 'QUANTITY'
+    },
+    // more items
+  ]</code></pre>
+    </p>
+  </p>
+  <p>On error the message will be sent through the second output with the error message as <code>msg.error</code>.</p>
+
+  <h3>Notes</h3>
+  <ul>
+    <li>Long language codes will be shortened to fit the supported language codes, e.g. <code>en-US</code> will be forwarded as <code>en</code> to AWS Comprehend.</li>
+  </ul>
+
+  <h3>References</h3>
+  <ul>
+    <li><a href="https://docs.aws.amazon.com/comprehend/latest/APIReference/API_DetectEntities.html#API_DetectEntities_RequestParameters" target="_blank">Supported language codes</a></li>
+  </ul>
+</script>

@@ -1,0 +1,5 @@
+.github
+infrastructure
+node_modules
+packages/*/dist
+jest.config.js

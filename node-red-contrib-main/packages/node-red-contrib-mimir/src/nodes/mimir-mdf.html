@@ -1,0 +1,215 @@
+<script type="text/javascript">
+  RED.nodes.registerType('mimir-mdf', {
+    category: 'Mimir',
+    color: '#68b0c0',
+    defaults: {
+      host: {
+        type: 'mimir-host',
+        required: true,
+      },
+      name: {
+        value: '',
+      },
+      operation: {
+        value: 'retrieve',
+      },
+      output: {
+        value: 'payload',
+      },
+      tenantPath: {
+        value: 'req.query.tenant',
+      },
+      tenantPathType: {
+        value: 'msg',
+      },
+      verboseLogging: {
+        value: false,
+      },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: 'mimir-logo.png',
+    align: 'left',
+    label: function () {
+      return this.name || `MDF ${this.operation}`;
+    },
+    paletteLabel: 'Mimir MDF',
+    outputLabels: function (index) {
+      return ['success', 'error'][index];
+    },
+    oneditprepare: function () {
+      $('#node-input-operation').typedInput({
+        types: [
+          {
+            value: 'operation',
+            options: [
+              { value: 'retrieveAll', label: 'Retrieve MDF entries' },
+              { value: 'create', label: 'Create an MDF entry' },
+              { value: 'retrieve', label: 'Retrieve an MDF entry' },
+              { value: 'update', label: 'Update an MDF entry' },
+              { value: 'delete', label: 'Delete an MDF entry' },
+            ],
+          },
+        ],
+      });
+
+      $('#node-input-output').typedInput({
+        types: ['msg'],
+        value: this.output,
+      });
+
+      $('#node-input-tenant-path').typedInput({ types: ['msg', 'flow', 'global'] });
+      $('#node-input-tenant-path').typedInput('type', this.tenantPathType ?? 'msg');
+      $('#node-input-tenant-path').typedInput('value', this.tenantPath);
+
+      $('#node-input-verboseLogging').prop('checked', !!this.verboseLogging);
+    },
+    oneditsave: function () {
+      this.tenantPath = $('#node-input-tenant-path').typedInput('value');
+      this.tenantPathType = $('#node-input-tenant-path').typedInput('type');
+
+      this.verboseLogging = $('#node-input-verboseLogging').is(':checked');
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="mimir-mdf">
+  <style>
+    #node-input-verboseLogging {
+      width: unset;
+    }
+  </style>
+
+  <div class="form-row">
+    <label for="node-input-host">
+      <i class="fa fa-user"></i>
+      Mimir Auth
+    </label>
+    <input type="text" id="node-input-host" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name">
+      <i class="fa fa-tag"></i>
+      Name
+    </label>
+    <input type="text" id="node-input-name" placeholder="" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-operation">
+      <i class="fa fa-wrench"></i>
+      Operation
+    </label>
+    <input type="text" id="node-input-operation" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-output">
+      <i class="fa fa-list"></i>
+      Output
+    </label>
+
+    <input id="node-input-output" type="text" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant-path">
+      <i class="fa fa-list"></i>
+      Tenant path
+    </label>
+
+    <input id="node-input-tenant-path" type="text" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-verboseLogging">
+      <i class="fa fa-cog"></i>
+      Verbose logging
+    </label>
+
+    <input id="node-input-verboseLogging" type="checkbox" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="mimir-mdf">
+  <h2>MDF Mimir API Node (<a href="https://mimir.mjoll.no/doc/api.html#tag/MDF" target="_blank">docs</a>)</h2>
+
+  <section>
+    Following APIs are implemented in this node:
+    <ul>
+      <li>Retrieve MDF entries</li>
+      <li>Create an MDF entry</li>
+      <li>Retrieve an MDF entry</li>
+      <li>Update an MDF entry</li>
+      <li>Delete an MDF entry</li>
+    </ul>
+  </section>
+
+  <section>
+    <dt>Retrieve/Update/Delete an MDF entry</dt>
+    <dd>
+      <code>mdfId</code> is required as path parameter and has to be set on the input message:
+      <pre><code>msg.mdfId = '798f7206-aa83-4b61-8519-50a8e14148e0';</code></pre>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Create/Update an MDF entry</dt>
+    <dd>
+      Body has to be set as <code>payload</code> of the input message:
+      <pre><code>msg.payload = {/* body data */};</code></pre>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Retrieve all MDF entries</dt>
+    <dd>
+      <p>
+        will return the collection itself instead of nested
+        <code>_embedded.collection</code> structure.
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Output</dt>
+    <dd>
+      <p>
+        Output will be at the <code>payload</code> property of the message by default if not defined here otherwise.
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Tenant path (used only on authType "Tenants")</dt>
+    <dd>
+      <p>Path from <code>msg</code>, <code>flow</code> or <code>global</code> to get the tenant name from.</p>
+
+      <p>
+        Rejects with error <code>Invalid tenant!</code> if tenant name is not a string or is an empty string.<br />
+        Rejects with error <code>Tenant "&lt;TENANT_NAME&gt;" not found!</code> if tenant name cannot be found in config
+        list.
+      </p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Verbose logging</dt>
+    <dd>
+      <p>Provides more logging information.</p>
+    </dd>
+  </section>
+
+  <section>
+    <dt>Node outputs</dt>
+    <dd>
+      <p>
+        On success the message will be sent through the first output.<br />
+        On error the message will be sent through the second output with the
+        <a href="https://github.com/axios/axios#handling-errors" target="_blank">http error</a> as
+        <code>error</code> attached.
+      </p>
+    </dd>
+  </section>
+</script>

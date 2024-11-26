@@ -1,0 +1,45 @@
+{
+  "name": "@kunnusta/node-red-contrib",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "buildCatalogue": "npx esbuild src/**/* --bundle --platform=node --outdir=dist && node dist/index.js",
+    "build": "lerna run build",
+    "build:clear": "lerna run build:clear",
+    "lint:ci": "lerna run lint:ci",
+    "increase-version": "lerna version patch --yes --force-publish",
+    "upload": "lerna run upload",
+    "test": "jest",
+    "coverage": "jest --coverage",
+    "install-all": "lerna run install-package",
+    "uninstall-all": "chmod +x ./uninstall.sh && bash ./uninstall.sh",
+    "locally": "npm run install-all && cd ~/.node-red && node-red"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@swc/core": "^1.5.28",
+    "@swc/jest": "^0.2.36",
+    "@types/jest": "^29.5.12",
+    "@types/node-red": "^1.3.5",
+    "@types/node-red-node-test-helper": "^0.3.4",
+    "@typescript-eslint/eslint-plugin": "^7.12.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^7.0.2",
+    "@typescript-eslint/parser": "^7.12.0",
+    "esbuild": "^0.21.3",
+    "esbuild-node-externals": "^1.13.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-sonarjs": "^1.0.3",
+    "jest": "^29.7.0",
+    "lerna": "^8.1.3",
+    "node-red": "^3.1.9",
+    "node-red-node-test-helper": "^0.3.4",
+    "prettier": "^3.3.1",
+    "rimraf": "^5.0.7",
+    "serverless-deployment-bucket": "^1.6.0",
+    "serverless-export-env": "^2.2.0",
+    "typescript": "^5.4.5"
+  }
+}
