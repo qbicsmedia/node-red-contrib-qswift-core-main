@@ -3,7 +3,7 @@
     "updated_at": "2024-08-19T05:43:50.536Z",
     "modules": [{
             "id": "@qbicsmedia/node-red-contrib-item-receiver",
-            "version": "1.1.2",
+            "version": "1.1.3",
             "description": "Item Receiver for Mimir",
             "updated_at": "2024-08-19T05:43:50.536Z",
             "types": [],
